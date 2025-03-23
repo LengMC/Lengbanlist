@@ -12,6 +12,7 @@ public class ReportEntry implements ConfigurationSerializable {
     private String reporter;
     private String reason;
     private String id;
+    private String status;
 
     public ReportEntry() {}
 
@@ -20,6 +21,7 @@ public class ReportEntry implements ConfigurationSerializable {
         this.reporter = reporter;
         this.reason = reason;
         this.id = id;
+        this.status = null; // 默认状态为 null
     }
 
     public String getTarget() {
@@ -37,15 +39,14 @@ public class ReportEntry implements ConfigurationSerializable {
     public String getId() {
         return id;
     }
-    private String status;
 
-public String getStatus() {
-    return status;
-}
+    public String getStatus() {
+        return status;
+    }
 
-public void setStatus(String status) {
-    this.status = status;
-}
+    public void setStatus(String status) {
+        this.status = status;
+    }
 
     @Override
     public Map<String, Object> serialize() {
@@ -54,6 +55,7 @@ public void setStatus(String status) {
         map.put("reporter", reporter);
         map.put("reason", reason);
         map.put("id", id);
+        map.put("status", status);
         return map;
     }
 

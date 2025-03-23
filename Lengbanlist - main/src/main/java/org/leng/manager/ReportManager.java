@@ -2,13 +2,13 @@ package org.leng.manager;
 
 import org.leng.Lengbanlist;
 import org.leng.object.ReportEntry;
+import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.List;
 import java.io.File;
-import java.io.IOException;
 
 public class ReportManager {
     private final Lengbanlist plugin;
@@ -38,30 +38,36 @@ public class ReportManager {
 
     public void saveReports() {
         // 保存举报记录到文件
-        plugin.getReportFC().set("reports", reports.values());
+        FileConfiguration reportFC = plugin.getReportFC();
+        reportFC.set("reports", null); // 清空旧数据
+        for (ReportEntry report : reports.values()) {
+            reportFC.set("reports." + report.getId(), report.serialize());
+        }
         try {
-            plugin.getReportFC().save(new File(plugin.getDataFolder(), "reports.yml"));
-        } catch (IOException e) {
+            reportFC.save(new File(plugin.getDataFolder(), "reports.yml"));
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     public void loadReports() {
         // 从文件加载举报记录
-        if (plugin.getReportFC().contains("reports")) {
-            for (String key : plugin.getReportFC().getConfigurationSection("reports").getKeys(false)) {
-                ReportEntry report = plugin.getReportFC().getSerializable(key, ReportEntry.class);
+        FileConfiguration reportFC = plugin.getReportFC();
+        if (reportFC.contains("reports")) {
+            for (String key : reportFC.getConfigurationSection("reports").getKeys(false)) {
+                ReportEntry report = ReportEntry.deserialize(reportFC.getConfigurationSection("reports").getConfigurationSection(key).getValues(false));
                 if (report != null) {
                     reports.put(report.getId(), report);
                 }
             }
         }
     }
-    public List<ReportEntry> getPendingReports() {
-    return reports.values().stream().filter(report -> report.getStatus() == null || !report.getStatus().equals("已关闭")).toList();
-}
 
-public int getPendingReportCount() {
-    return (int) reports.values().stream().filter(report -> report.getStatus() == null || !report.getStatus().equals("已关闭")).count();
-}
+    public List<ReportEntry> getPendingReports() {
+        return reports.values().stream().filter(report -> report.getStatus() == null || !report.getStatus().equals("已关闭")).toList();
+    }
+
+    public int getPendingReportCount() {
+        return (int) reports.values().stream().filter(report -> report.getStatus() == null || !report.getStatus().equals("已关闭")).count();
+    }
 }

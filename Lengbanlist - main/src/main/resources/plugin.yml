@@ -1,43 +1,32 @@
 name: Lengbanlist
-version: 1.6.3
 main: org.leng.Lengbanlist
+version: 1.6.3
+api-version: 1.13
 commands:
   lban:
     description: 主命令
-    usage: /<command> <子命令> [参数]
-  report:
-    description: 举报命令
-    usage: /<command> <玩家名/子命令> [原因/参数]
-  admin:
-    description: 管理员命令
-    usage: /<command> <子命令> [参数]
-  check:
-    description: 检查命令
-    usage: /<command> <玩家名/IP>
-  language:
-    description: 语言选择命令
-    usage: /<command>
+    usage: /<command> <subcommand>
   ban:
-    description: 封禁玩家命令
-    usage: /<command> <玩家名/IP> [时间] [原因]
+    description: 封禁玩家
+    usage: /<command> <player> <days> <reason>
+  ban-ip:
+    description: 封禁 IP
+    usage: /<command> <IP> <days> <reason>
   unban:
-    description: 解除封禁命令
-    usage: /<command> <玩家名/IP>
-  mute:
-    description: 禁言玩家命令
-    usage: /<command> <玩家名> [原因]
-  unmute:
-    description: 解除禁言命令
-    usage: /<command> <玩家名>
+    description: 解封玩家
+    usage: /<command> <player>
   warn:
-    description: 警告玩家命令
-    usage: /<command> <玩家名> [原因]
+    description: 警告玩家
+    usage: /<command> <player> <reason>
   unwarn:
-    description: 移除警告命令
-    usage: /<command> <玩家名>
-  add:
-    description: 添加封禁命令
-    usage: /<command> <玩家名/IP> <时间> <原因>
-  remove:
-    description: 移除封禁命令
-    usage: /<command> <玩家名/IP>
+    description: 移除警告
+    usage: /<command> <player>
+  check:
+    description: 检查玩家或 IP 的封禁状态
+    usage: /<command> <player/IP>
+  language:
+    description: 切换语言
+    usage: /<command>
+  report:
+    description: 举报玩家
+    usage: /<command> <player> <reason>
