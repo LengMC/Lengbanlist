@@ -2,8 +2,8 @@
 
 ![Lengbanlist](https://github.com/LengMC/Lengbanlist/blob/main/Photos/Lengbanlist.png)
 ![Lengbanlist](https://bstats.org/signatures/bukkit/Lengbanlist.svg)
-[![Minecraft Version](https://img.shields.io/badge/Minecraft-1.21.4-brightgreen)](https://www.minecraft.net)
-[![License](https://img.shields.io/badge/License-MPL2.0-blue)](LICENSE)
+[![Minecraft Version](https://img.shields.io/badge/Minecraft-1.21.x-brightgreen)](https://www.minecraft.net)
+[![License](https://img.shields.io/badge/License-MPL-2.0-blue)](LICENSE)
 
 ## 简介
 Lengbanlist 是一款专为高版本 Minecraft 服务器设计的插件，它通过本地封禁名单（banlist）在聊天栏实时广播封禁信息，帮助管理员及时通知玩家，提升服务器管理的透明度和效率。
