@@ -90,16 +90,20 @@ public class LengbanlistCommand extends Command implements CommandExecutor, List
                 showBanList(sender);
                 break;
             case "reload":
-                if (!sender.hasPermission("lengbanlist.reload")) {
-                    Utils.sendMessage(sender, plugin.prefix() + "§c不是你的工作喵！");
-                    return true;
-                }
-                plugin.reloadConfig();
-                ModelManager.getInstance().reloadModel();
-                File broadcastFile = new File(plugin.getDataFolder(), "broadcast.yml");
-                plugin.getServer().broadcastMessage(plugin.getConfig().getString("default-message").replace("%s", String.valueOf(plugin.getBanManager().getBanList().size())));
-                Utils.sendMessage(sender, currentModel.reloadConfig());
-                break;
+    if (!sender.hasPermission("lengbanlist.reload")) {
+        Utils.sendMessage(sender, plugin.prefix() + "§c不是你的工作喵！");
+        return true;
+    }
+    plugin.reloadConfig(); // 重新加载主配置文件
+    ModelManager.getInstance().reloadModel(); // 重新加载模型
+
+    // 重新加载语言设置
+    plugin.getLanguageManager().reloadLanguage();
+
+    File broadcastFile = new File(plugin.getDataFolder(), "broadcast.yml");
+    plugin.getServer().broadcastMessage(plugin.getConfig().getString("default-message").replace("%s", String.valueOf(plugin.getBanManager().getBanList().size())));
+    Utils.sendMessage(sender, currentModel.reloadConfig());
+    break;
             case "add":
                 if (!sender.hasPermission("lengbanlist.ban")) {
                     Utils.sendMessage(sender, plugin.prefix() + "§c不是你的工作喵！");

@@ -9,7 +9,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.Material;
 import org.leng.Lengbanlist;
-import org.leng.manager.ModelManager;
 
 import java.io.File;
 import java.io.FileReader;
@@ -22,11 +21,9 @@ import java.util.List;
 
 public class LanguageManager {
     private final Lengbanlist plugin;
-    private final ModelManager modelManager;
 
     public LanguageManager(Lengbanlist plugin) {
         this.plugin = plugin;
-        this.modelManager = ModelManager.getInstance();
     }
 
     /**
@@ -36,75 +33,64 @@ public class LanguageManager {
      * @param languageCode 语言代码
      */
     public void switchLanguage(Player player, String languageCode) {
-        // 保存玩家选择的语言
-        plugin.getConfig().set("player_language." + player.getUniqueId(), languageCode);
-        plugin.saveConfig();
-
-        // 如果切换到非默认语言，禁用 ModelManager
-        if (!languageCode.equals("default")) {
-            modelManager.setEnabled(false);
-            player.sendMessage(plugin.prefix() + "§a已禁用模型切换功能，切换到 JSON 文件显示帮助信息。");
-
-            // 加载 JSON 文件中的帮助信息
-            loadHelpFromJson(languageCode);
-        } else {
-            modelManager.setEnabled(true);
-            player.sendMessage(plugin.prefix() + "§a已启用模型切换功能。");
+        // 检查语言文件是否存在
+        File languageFile = new File(plugin.getDataFolder(), "language/" + languageCode + ".yml");
+        if (!languageFile.exists()) {
+            plugin.getLogger().warning("语言文件不存在: " + languageFile.getName());
+            // 回退到默认语言
+            languageCode = "default";
+            languageFile = new File(plugin.getDataFolder(), "language/default.yml");
         }
 
+        // 加载语言文件
+        loadLanguageFile(languageFile);
+
         // 发送语言切换成功的消息
-        player.sendMessage(plugin.prefix() + "§a语言已切换为: " + languageCode);
+        String languageChangedMessage = plugin.getConfig().getString("language_changed", "§a语言已切换为: %language%");
+        player.sendMessage(languageChangedMessage.replace("%language%", languageCode));
     }
 
     /**
-     * 从 JSON 文件加载帮助信息
+     * 加载语言文件
      *
-     * @param languageCode 语言代码
+     * @param languageFile 语言文件
      */
-    private void loadHelpFromJson(String languageCode) {
-        File languageFile = new File(plugin.getDataFolder(), "language/" + languageCode + ".json");
+    private void loadLanguageFile(File languageFile) {
+        try {
+            FileConfiguration languageConfig = YamlConfiguration.loadConfiguration(languageFile);
+            plugin.getConfig().set("prefix", languageConfig.getString("prefix", "§7[Lengbanlist] "));
+            plugin.getConfig().set("language_changed", languageConfig.getString("language_changed", "§a语言已切换为: %language%"));
+            plugin.getConfig().set("help_header", languageConfig.getString("help_header", "§bLengbanlist §2§o帮助信息 - 默认风格:"));
+            plugin.getConfig().set("help_commands", languageConfig.getConfigurationSection("help_commands"));
+            plugin.getConfig().set("version_info", languageConfig.getString("version_info", "§6当前版本: %version%"));
+            plugin.getConfig().set("hitokoto", languageConfig.getString("hitokoto", "§d%hitokoto%"));
+            plugin.saveConfig();
+        } catch (Exception e) {
+            plugin.getLogger().warning("无法加载语言文件: " + languageFile.getName());
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 重新加载语言设置
+     */
+    public void reloadLanguage() {
+        FileConfiguration config = plugin.getConfig();
+        String defaultLanguage = config.getString("language", "default");
+
+        // 加载默认语言文件
+        File languageFile = new File(plugin.getDataFolder(), "language/" + defaultLanguage + ".yml");
         if (!languageFile.exists()) {
-            plugin.getLogger().warning("语言文件不存在: " + languageFile.getName());
-            return;
+            plugin.getLogger().warning("默认语言文件不存在: " + languageFile.getName());
+            defaultLanguage = "default";
+            languageFile = new File(plugin.getDataFolder(), "language/default.yml");
         }
 
-        try (BufferedReader reader = new BufferedReader(new FileReader(languageFile))) {
-            StringBuilder jsonContent = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                jsonContent.append(line);
-            }
+        loadLanguageFile(languageFile);
 
-            // 解析 JSON 内容
-            JSONObject jsonObject = new JSONObject(jsonContent.toString());
-            String helpHeader = jsonObject.getString("help_header");
-            JSONObject helpCommands = jsonObject.getJSONObject("help_commands");
-            String versionInfo = jsonObject.getString("version_info");
-            String hitokoto = jsonObject.getString("hitokoto"); // 获取一言内容
-
-            // 构建完整的帮助信息
-            StringBuilder helpMessage = new StringBuilder();
-            helpMessage.append(helpHeader).append("\n");
-            for (String command : helpCommands.keySet()) {
-                helpMessage.append(helpCommands.getString(command)).append("\n");
-            }
-            helpMessage.append(versionInfo).append("\n");
-            helpMessage.append(hitokoto); // 添加一言内容
-
-            // 更新帮助信息到配置文件
-            plugin.getConfig().set("help_header", helpHeader);
-            plugin.getConfig().set("help_commands", helpCommands);
-            plugin.getConfig().set("version_info", versionInfo);
-            plugin.getConfig().set("hitokoto", hitokoto); // 保存一言内容
-            plugin.saveConfig();
-
-            // 发送帮助信息到玩家
-            for (Player player : Bukkit.getOnlinePlayers()) {
-                player.sendMessage(helpMessage.toString());
-            }
-        } catch (IOException e) {
-            plugin.getLogger().warning("无法读取语言文件: " + languageFile.getName());
-            e.printStackTrace();
+        // 通知所有玩家语言已重新加载
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            player.sendMessage(plugin.getConfig().getString("language_changed", "§a语言已切换为: %language%").replace("%language%", defaultLanguage));
         }
     }
 

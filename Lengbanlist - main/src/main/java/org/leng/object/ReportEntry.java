@@ -21,7 +21,6 @@ public class ReportEntry implements ConfigurationSerializable {
         this.reporter = reporter;
         this.reason = reason;
         this.id = id;
-        this.status = null; // 默认状态为 null
     }
 
     public String getTarget() {

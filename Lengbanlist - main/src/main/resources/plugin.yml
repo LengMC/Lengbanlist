@@ -30,3 +30,6 @@ commands:
   report:
     description: 举报玩家
     usage: /<command> <player> <reason>
+  admin:
+    description: 管理举报
+    usage: /<command> <subcommand>
