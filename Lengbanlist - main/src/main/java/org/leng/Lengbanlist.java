@@ -136,6 +136,8 @@ public void onEnable() {
     getCommand("language").setExecutor(new LanguageCommand(this, languageManager));
     getCommand("report").setExecutor(new ReportCommand(this)); 
     getCommand("admin").setExecutor(new AdminReportCommand(this));
+    getCommand("kick").setExecutor(new KickCommand(this));
+    getCommand("info").setExecutor(new InfoCommand(this));
 
     getServer().getConsoleSender().sendMessage("§b  _                      ____              _      _     _   ");
     getServer().getConsoleSender().sendMessage("§6 | |                    |  _ \\            | |    (_)   | |  ");

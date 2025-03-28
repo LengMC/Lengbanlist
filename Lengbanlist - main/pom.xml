@@ -5,7 +5,7 @@
 
     <groupId>org.leng</groupId>
     <artifactId>Lengbanlist</artifactId>
-    <version>1.6.3-Official</version>
+    <version>1.6.4-Official</version>
 
     <name>Lengbanlist</name>
 
@@ -62,7 +62,7 @@
 
     <build>
         <defaultGoal>clean package</defaultGoal>
-        <finalName>Lengbanlist - 1.6.3</finalName>
+        <finalName>Lengbanlist - 1.6.4</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

@@ -10,34 +10,56 @@ public class Herta implements Model {
         return "Herta";
     }
 
-@Override
-public void showHelp(CommandSender sender) {
-    Utils.sendMessage(sender, "§bLengbanlist §2§o帮助信息 - 希儿风格:");
-    Utils.sendMessage(sender, "§b§l/lban list - §3§o查看被封禁的名单，希儿的正义不容挑战！");
-    Utils.sendMessage(sender, "§b§l/lban a - §3§o广播当前封禁人数，让违规者无处可逃！");
-    Utils.sendMessage(sender, "§b§l/lban toggle - §3§o开启/关闭自动广播，掌控一切！");
-    Utils.sendMessage(sender, "§b§l/lban model <模型名称> - §3§o切换模型，体验不同的风格。");
-    Utils.sendMessage(sender, "§b§l/lban reload - §3§o重新加载配置，确保一切正常运行。");
-    Utils.sendMessage(sender, "§b§l/lban add <玩家名> <天数> <原因> - §3§o添加封禁，维护正义。");
-    Utils.sendMessage(sender, "§b§l/lban remove <玩家名> - §3§o移除封禁，给予机会。");
-    Utils.sendMessage(sender, "§b§l/lban mute <玩家名> <原因> - §3§o禁言玩家，维护正义。");
-    Utils.sendMessage(sender, "§b§l/lban unmute <玩家名> - §3§o解除禁言，给予机会。");
-    Utils.sendMessage(sender, "§b§l/lban list-mute - §3§o查看禁言列表，希儿的正义领域。");
-    Utils.sendMessage(sender, "§b§l/lban help - §3§o显示帮助信息，不懂就问。");
-    Utils.sendMessage(sender, "§b§l/lban open - §3§o打开可视化操作界面，希儿的正义领域。");
-    Utils.sendMessage(sender, "§b§l/lban getIP <玩家名> - §3§o查询玩家的 IP 地址，找出违规者。");
-    Utils.sendMessage(sender, "§b§l/ban-ip <IP地址> <天数> <原因> - §3§o封禁 IP 地址，维护正义。");
-    Utils.sendMessage(sender, "§b§l/unban-ip <IP地址> - §3§o解除 IP 封禁，给予机会。");
-    Utils.sendMessage(sender, "§b§l/lban warn <玩家名> <原因> - §3§o警告玩家，三次警告将自动封禁！");
-    Utils.sendMessage(sender, "§b§l/lban unwarn <玩家名> - §3§o移除玩家的警告记录。");
-    Utils.sendMessage(sender, "§b§l/lban check <玩家名/IP> - §3§o检查玩家或IP的封禁状态，希儿的正义不容挑战！");
-    Utils.sendMessage(sender, "§b§l/lban language - §3§o打开语言选择页面，选择适合的语言进行操作。");
-    Utils.sendMessage(sender, "§b§l/report <玩家名> <原因> - §3§o维护正义，举报违规者，希儿会守护秩序！");
-    Utils.sendMessage(sender, "§7-> §b§l/report accept <举报编号> - §3§o受理举报，维护正义。");
-    Utils.sendMessage(sender, "§7-> §b§l/report close <举报编号> - §3§o关闭举报，正义已伸张。");
-    Utils.sendMessage(sender, "§b§l/lban admin - §3§o打开管理员界面，守护正义。");
-    Utils.sendMessage(sender, "§6当前版本: " + Lengbanlist.getInstance().getPluginVersion() + " Model: 希儿 Herta");
-}
+    @Override
+    public void showHelp(CommandSender sender) {
+        Utils.sendMessage(sender, "§b╔══════════════════════════════════╗");
+        Utils.sendMessage(sender, "§b║ §2§oLengbanlist 帮助信息 - 希儿风格 §b║");
+        Utils.sendMessage(sender, "§b╠══════════════════════════════════╣");
+        Utils.sendMessage(sender, "§2✦ §b/lban list §7- §3查看被封禁的名单，希儿的正义不容挑战！");
+        Utils.sendMessage(sender, "§2✦ §b/lban a §7- §3广播当前封禁人数，让违规者无处可逃！");
+        Utils.sendMessage(sender, "§2✦ §b/lban toggle §7- §3开启/关闭自动广播，掌控一切！");
+        Utils.sendMessage(sender, "§2✦ §b/lban model <模型名称> §7- §3切换模型，体验不同的风格。");
+        Utils.sendMessage(sender, "§2✦ §b/lban reload §7- §3重新加载配置，确保一切正常运行。");
+        Utils.sendMessage(sender, "§2✦ §b/lban add <玩家名> <天数> <原因> §7- §3添加封禁，维护正义。");
+        Utils.sendMessage(sender, "§2✦ §b/lban remove <玩家名> §7- §3移除封禁，给予机会。");
+        Utils.sendMessage(sender, "§2✦ §b/lban mute <玩家名> <原因> §7- §3禁言玩家，维护正义。");
+        Utils.sendMessage(sender, "§2✦ §b/lban unmute <玩家名> §7- §3解除禁言，给予机会。");
+        Utils.sendMessage(sender, "§2✦ §b/lban list-mute §7- §3查看禁言列表，希儿的正义领域。");
+        Utils.sendMessage(sender, "§2✦ §b/lban help §7- §3显示帮助信息，不懂就问。");
+        Utils.sendMessage(sender, "§2✦ §b/lban open §7- §3打开可视化操作界面，希儿的正义领域。");
+        Utils.sendMessage(sender, "§2✦ §b/lban getIP <玩家名> §7- §3查询玩家的 IP 地址，找出违规者。");
+        Utils.sendMessage(sender, "§2✦ §b/ban-ip <IP地址> <天数> <原因> §7- §3封禁 IP 地址，维护正义。");
+        Utils.sendMessage(sender, "§2✦ §b/unban-ip <IP地址> §7- §3解除 IP 封禁，给予机会。");
+        Utils.sendMessage(sender, "§2✦ §b/lban warn <玩家名> <原因> §7- §3警告玩家，三次警告将自动封禁！");
+        Utils.sendMessage(sender, "§2✦ §b/lban unwarn <玩家名> §7- §3移除玩家的警告记录。");
+        Utils.sendMessage(sender, "§2✦ §b/lban check <玩家名/IP> §7- §3检查玩家或IP的封禁状态，希儿的正义不容挑战！");
+        Utils.sendMessage(sender, "§2✦ §b/lban language §7- §3打开语言选择页面，选择适合的语言进行操作。");
+        Utils.sendMessage(sender, "§2✦ §b/report <玩家名> <原因> §7- §3维护正义，举报违规者，希儿会守护秩序！");
+        Utils.sendMessage(sender, "§7-> §2§l/report accept <举报编号> §7- §3受理举报，维护正义。");
+        Utils.sendMessage(sender, "§7-> §2§l/report close <举报编号> §7- §3关闭举报，正义已伸张。");
+        Utils.sendMessage(sender, "§2✦ §b/kick <玩家名> <原因> §7- §3踢出不听话的家伙！");
+        Utils.sendMessage(sender, "§2✦ §b/lban info §7- §3查看插件信息，了解当前运行状态，希儿的正义不容挑战！");
+        Utils.sendMessage(sender, "§b╚══════════════════════════════════╝");
+        Utils.sendMessage(sender, "§2♡ 当前版本: " + Lengbanlist.getInstance().getPluginVersion() + " §7| §b模型: 希儿 Herta");
+    }
+
+    @Override
+    public String getKickMessage(String reason) {
+        return "§5╔══════════════════════════╗\n" +
+               "§5║   §d希儿的驱逐通知  §5║\n" +
+               "§5╠══════════════════════════╣\n" +
+               "§d☠️ 你被希儿踢出服务器啦！\n\n" +
+               "§7原因: §f" + reason + "\n\n" +
+               "§d想回来记得找希儿哦~\n" +
+               "§5╚══════════════════════════╝";
+    }
+
+    @Override
+    public String onKickSuccess(String playerName, String reason) {
+        return "§b✧ 希儿说：§a" + playerName + " §e已被踢出！\n" +
+               "§5原因: §f" + reason + "\n" +
+               "§b调皮捣蛋可是要额外收费的~ §5(◕‿◕✿)";
+    }
 
     @Override
     public String toggleBroadcast(boolean enabled) {

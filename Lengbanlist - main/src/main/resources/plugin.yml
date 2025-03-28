@@ -1,6 +1,6 @@
 name: Lengbanlist
 main: org.leng.Lengbanlist
-version: 1.6.3
+version: 1.6.4
 api-version: 1.13
 commands:
   lban:
@@ -33,3 +33,9 @@ commands:
   admin:
     description: 管理举报
     usage: /<command> <subcommand>
+  info:
+    description: 显示插件信息
+    usage: /<command>
+  kick:
+    description: 踢出玩家
+    usage: /<command> <玩家名> [原因]

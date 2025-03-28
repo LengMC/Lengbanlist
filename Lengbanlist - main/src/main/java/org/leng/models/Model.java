@@ -26,4 +26,8 @@ public interface Model {
     String addWarn(String player, String reason);
 
     String removeWarn(String player);
+    
+    String getKickMessage(String reason);
+    
+    String onKickSuccess(String playerName, String reason);
 }

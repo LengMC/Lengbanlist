@@ -324,9 +324,15 @@ public class LengbanlistCommand extends Command implements CommandExecutor, List
                 CheckCommand checkCommand = new CheckCommand(plugin);
                 checkCommand.execute(sender, "check", new String[]{checkTarget});
                 break;
+            case "info":
+    if (!sender.hasPermission("lengbanlist.info")) {
+        Utils.sendMessage(sender, plugin.prefix() + "§c不是你的工作喵！");
+        return true;
+    }
+    return new InfoCommand(plugin).onCommand(sender, null, "info", new String[0]);
             case "language":
                 if (!sender.hasPermission("lengbanlist.language")) {
-                    Utils.sendMessage(sender, plugin.prefix() + "§c你没有权限使用此命令。");
+                    Utils.sendMessage(sender, plugin.prefix() + "§c不是你的工作喵！");
                     return true;
                 }
                 if (sender instanceof Player) {
