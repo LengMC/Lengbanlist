@@ -1,6 +1,6 @@
 # Lengbanlist 插件
 
-简体中文 | [English](README_en.md)
+[简体中文](README.md) | English
 
 ![Lengbanlist](https://github.com/LengMC/Lengbanlist/blob/main/Photos/Lengbanlist.png)
 ![Lengbanlist](https://bstats.org/signatures/bukkit/Lengbanlist.svg)
