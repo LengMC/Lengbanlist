@@ -44,7 +44,7 @@ public class WarnCommand extends Command implements CommandExecutor {
 
         List<WarnEntry> warnings = warnManager.getActiveWarnings(target);
         if (warnings.size() >= 3) {
-            Utils.sendMessage(sender, plugin.prefix() + "§c玩家 " + target + " 已被警告 3 次，无法继续警告。");
+            Utils.sendMessage(sender, plugin.prefix() + "§c玩家 " + target + " 已被警告 3 次，无法继续警告，请unwarn该玩家后再给予警告！");
             return false;
         }
 

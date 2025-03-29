@@ -65,7 +65,7 @@ public class WarnManager {
                     player,
                     "System",
                     now + banDuration,
-                    String.format("自动封禁（%d次警告，第%d次触发） <auto>", 
+                    String.format("自动封禁（%d次警告，第%d次触发） <Lengbanlist-auto>", 
                             validWarnings.size(), triggerCount),
                     true
             );
@@ -73,7 +73,7 @@ public class WarnManager {
             Lengbanlist.getInstance().getBanManager().banPlayer(banEntry);
             
             String message = String.format(
-                    "§6[AutoBan] §e%s §c因30天内累计%d次警告被自动封禁§a%s §6<auto>",
+                    "§6[Lengbanlist-AutoBan] §e%s §c因30天内累计%d次警告被自动封禁§a%s §6<auto>",
                     player, validWarnings.size(), formattedDuration);
             Lengbanlist.getInstance().getServer().broadcastMessage(message);
         }
