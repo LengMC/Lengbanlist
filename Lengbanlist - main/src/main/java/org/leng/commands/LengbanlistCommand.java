@@ -113,7 +113,7 @@ public class LengbanlistCommand extends Command implements CommandExecutor, List
                     return true;
                 }
                 if (args.length < 4) {
-                    Utils.sendMessage(sender, plugin.prefix() + "§c§l命令格式错误，正确格式: /lban add <玩家名/IP> <时间> <原因>");
+                    Utils.sendMessage(sender, plugin.prefix() + "§c§l命令格式错误，正确格式: /lban add <玩家名/IP> <时间/auto> <原因>");
                     return true;
                 }
                 try {

@@ -6,9 +6,10 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.leng.Lengbanlist;
 import org.leng.object.BanEntry;
-import org.leng.object.BanIpEntry;
 import org.leng.utils.TimeUtils;
 import org.leng.utils.Utils;
+
+import java.util.Arrays; 
 
 public class BanCommand implements CommandExecutor {
     private final Lengbanlist plugin;
@@ -19,56 +20,98 @@ public class BanCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        // 权限检查
         if (sender instanceof Player) {
             Player player = (Player) sender;
-            if (!sender.isOp() || !player.hasPermission("lengban.ban")) {
+            if (!sender.isOp() && !player.hasPermission("lengban.ban")) {
                 Utils.sendMessage(sender, "§c你没有权限使用此命令。");
                 return false;
             }
         }
 
+        // 参数检查
         if (args.length < 3) {
-            Utils.sendMessage(sender, "§c用法错误: /ban <玩家> <时间|auto> <原因>");
-            Utils.sendMessage(sender, "§c时间单位: s(秒), m(分), h(时), d(天), w(周), M(月), y(年)");
-            Utils.sendMessage(sender, "§c使用 auto 自动计算封禁时间（基于警告次数）");
+            sendUsage(sender);
             return false;
         }
 
-        if (plugin.getBanManager().isPlayerBanned(args[0])) {
-            Utils.sendMessage(sender, "§c玩家 " + args[0] + " 已经被封禁");
+        String target = args[0];
+        String timeArg = args[1];
+        String reason = String.join(" ", Arrays.copyOfRange(args, 2, args.length));
+
+        // 检查是否已封禁
+        if (plugin.getBanManager().isPlayerBanned(target)) {
+            Utils.sendMessage(sender, "§c玩家 " + target + " 已经被封禁");
             return false;
         }
 
-        long banTimestamp;
+        long banDuration;
         boolean isAuto = false;
 
-        if (args[1].equalsIgnoreCase("auto")) {
+        if (timeArg.equalsIgnoreCase("auto")) {
             isAuto = true;
-            banTimestamp = calculateAutoBanTime(args[0]);
+            banDuration = calculateAutoBanTime(target);
+            // 仅对auto封禁确保最小1天
+            banDuration = Math.max(banDuration, TimeUtils.daysToMillis(1));
         } else {
-            banTimestamp = TimeUtils.parseTime(args[1]);
-            if (banTimestamp == -1) {
+            banDuration = TimeUtils.parseDurationToMillis(timeArg);
+            if (banDuration <= 0) {
                 showTimeFormatError(sender);
                 return false;
             }
+            // 玩家手动设置的封禁时间不做限制
         }
 
-        // 修复显示0天实际1天的问题
-        if (banTimestamp < TimeUtils.daysToMillis(1) && banTimestamp > 0) {
-            banTimestamp = TimeUtils.daysToMillis(1);
-        }
-
+        long banEndTime = System.currentTimeMillis() + banDuration;
+        
         BanEntry entry = new BanEntry(
-                args[0], 
-                sender.getName(), 
-                banTimestamp, 
-                args[2],
-                isAuto
+            target,
+            sender.getName(),
+            banEndTime,
+            reason,
+            isAuto
         );
         
         plugin.getBanManager().banPlayer(entry);
-        sendBanResult(sender, args[0], banTimestamp, isAuto, args[1]);
+        sendBanResult(sender, target, banDuration, isAuto);
         return true;
+    }
+
+    private long calculateAutoBanTime(String playerName) {
+        int warnCount = Math.max(0, plugin.getWarnManager().getActiveWarnings(playerName).size());
+        
+        // 自动封禁阶梯式时长
+        switch (warnCount) {
+            case 0:  return TimeUtils.daysToMillis(1);  // 无警告记录也封1天
+            case 1:  return TimeUtils.daysToMillis(3);
+            case 2:  return TimeUtils.daysToMillis(7);
+            case 3:  return TimeUtils.daysToMillis(14);
+            case 4:  return TimeUtils.daysToMillis(30);
+            default: return Long.MAX_VALUE; // 超过4次永久封禁
+        }
+    }
+
+    private void sendBanResult(CommandSender sender, String player, long durationMillis, boolean isAuto) {
+        String durationStr;
+        if (durationMillis == Long.MAX_VALUE) {
+            durationStr = "永久";
+        } else {
+            long days = durationMillis / TimeUtils.daysToMillis(1);
+            durationStr = days + "天";
+        }
+
+        String message = String.format("§a成功封禁 玩家: %s，时长: %s%s",
+            player,
+            durationStr,
+            isAuto ? " §6<auto>" : "");
+
+        Utils.sendMessage(sender, message);
+    }
+
+    private void sendUsage(CommandSender sender) {
+        Utils.sendMessage(sender, "§c用法错误: /ban <玩家> <时间/auto> <原因>");
+        Utils.sendMessage(sender, "§c时间单位: s(秒), m(分), h(时), d(天), w(周), M(月), y(年)");
+        Utils.sendMessage(sender, "§c使用 auto 自动计算封禁时间（基于警告次数）");
     }
 
     private void showTimeFormatError(CommandSender sender) {
@@ -82,37 +125,5 @@ public class BanCommand implements CommandExecutor {
         Utils.sendMessage(sender, "§c - 1y: 年 (1 年，按 365 天计算)");
         Utils.sendMessage(sender, "§c - forever: 永久封禁");
         Utils.sendMessage(sender, "§c - auto: 自动计算封禁时间");
-    }
-
-    private void sendBanResult(CommandSender sender, String player, long banTimestamp, boolean isAuto, String timeString) {
-        String duration;
-        if (banTimestamp == Long.MAX_VALUE) {
-            duration = "永久";
-        } else {
-            long remainingDays = (banTimestamp - System.currentTimeMillis()) / TimeUtils.daysToMillis(1);
-            // 确保至少显示1天
-            remainingDays = Math.max(1, remainingDays);
-            duration = remainingDays + "天";
-        }
-        
-        String message = String.format("§l§a成功封禁 玩家: %s，时长: %s%s",
-                player, 
-                duration,
-                isAuto ? " §6<auto>" : "");
-
-        Utils.sendMessage(sender, message);
-    }
-
-    private long calculateAutoBanTime(String playerName) {
-        int warnCount = Math.max(0, plugin.getWarnManager().getActiveWarnings(playerName).size());
-        
-        switch (warnCount) {
-            case 0:  return TimeUtils.daysToMillis(1);  // 无警告记录也封1天
-            case 1:  return TimeUtils.daysToMillis(3);
-            case 2:  return TimeUtils.daysToMillis(7);
-            case 3:  return TimeUtils.daysToMillis(14);
-            case 4:  return TimeUtils.daysToMillis(30);
-            default: return Long.MAX_VALUE; // 只有超过4次才永久
-        }
     }
 }
