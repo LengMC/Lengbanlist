@@ -140,7 +140,7 @@ public class BanManager {
                 String staff = parts[1];
                 long time = Long.parseLong(parts[2]);
                 String reason = parts[3];
-                banList.add(new BanEntry(target, staff, time, reason));
+                banList.add(new BanEntry(target, staff, time, reason, false)); // 添加默认值 false
             }
         }
         return banList;
@@ -197,7 +197,7 @@ public class BanManager {
                 String staff = parts[1];
                 long time = Long.parseLong(parts[2]);
                 String reason = parts[3];
-                return new BanEntry(target, staff, time, reason);
+                return new BanEntry(target, staff, time, reason, false); // 添加默认值 false
             }
         }
         return null;

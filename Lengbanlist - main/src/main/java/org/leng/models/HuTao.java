@@ -12,94 +12,102 @@ public class HuTao implements Model {
 
     @Override
     public void showHelp(CommandSender sender) {
-        Utils.sendMessage(sender, "§5╔══════════════════════════════════╗");
-        Utils.sendMessage(sender, "§5║  §bLengbanlist §5§l胡桃の帮助菜单  §5║");
-        Utils.sendMessage(sender, "§5╠══════════════════════════════════╣");
-        Utils.sendMessage(sender, "§5✦ §b/lban list §7- §d查看往生堂黑名单 §5⚰️");
-        Utils.sendMessage(sender, "§5✦ §b/lban a §7- §d广播当前往生人数 §5👻");
-        Utils.sendMessage(sender, "§5✦ §b/lban toggle §7- §d开关自动广播 §5🔊");
-        Utils.sendMessage(sender, "§5✦ §b/lban model <名称> §7- §d切换风格 §5🎭");
-        Utils.sendMessage(sender, "§5✦ §b/lban reload §7- §d重载胡桃小脑瓜 §5🧠");
-        Utils.sendMessage(sender, "§5✦ §b/lban add <玩家> <天> <原因> §7- §d加入黑名单 §5📜");
-        Utils.sendMessage(sender, "§5✦ §b/lban remove <玩家> §7- §d移除黑名单 §5✂️");
-        Utils.sendMessage(sender, "§5✦ §b/kick <玩家> <原因> §7- §d踢出不听话的家伙 §5👢");
-        Utils.sendMessage(sender, "§5✦ §b/lban mute <玩家> <原因> §7- §d禁言 §5🤫");
-        Utils.sendMessage(sender, "§5✦ §b/lban unmute <玩家> §7- §d解除禁言 §5🗣️");
-        Utils.sendMessage(sender, "§5✦ §b/lban warn <玩家> <原因> §7- §d警告 §5⚠️");
-        Utils.sendMessage(sender, "§5✦ §b/lban check <玩家/IP> §7- §d检查状态 §5🔍");
-        Utils.sendMessage(sender, "§5✦ §b/report <玩家> <原因> §7- §d举报捣蛋鬼 §5📢");
-        Utils.sendMessage(sender, "§7-> §5§l/report accept <举报编号> §7- §d受理举报 §5✅");
-        Utils.sendMessage(sender, "§7-> §5§l/report close <举报编号> §7- §d关闭举报 §5❌");
-        Utils.sendMessage(sender, "§5✦ §b/lban info §7- §d查看插件信息，了解当前运行状态，胡桃的小脑瓜又清晰啦！");
-        Utils.sendMessage(sender, "§5╚══════════════════════════════════╝");
-        Utils.sendMessage(sender, "§5♡ 当前版本: " + Lengbanlist.getInstance().getPluginVersion() + " §7| §5胡桃模式");
+        Utils.sendMessage(sender, "§b╔══════════════════════════════════╗");
+        Utils.sendMessage(sender, "§b║ §2§oLengbanlist 帮助信息 - 胡桃风格 §b║");
+        Utils.sendMessage(sender, "§b╠══════════════════════════════════╣");
+        Utils.sendMessage(sender, "§2✦ §b/lban list §7- §3查看被封禁的名单，这些家伙真是麻烦！");
+        Utils.sendMessage(sender, "§2✦ §b/lban a §7- §3广播当前封禁人数，让大家都知道这些捣乱的家伙！");
+        Utils.sendMessage(sender, "§2✦ §b/lban toggle §7- §3开启/关闭自动广播，想听就听，不想听就关！");
+        Utils.sendMessage(sender, "§2✦ §b/lban model <模型名称> §7- §3切换模型，试试别的风格吧！");
+        Utils.sendMessage(sender, "§2✦ §b/lban reload §7- §3重新加载配置，说不定能发现新东西！");
+        Utils.sendMessage(sender, "§2✦ §b/lban add <玩家名> <天数> <原因> §7- §3添加封禁，不守规矩就封了！");
+        Utils.sendMessage(sender, "§2✦ §b/lban remove <玩家名> §7- §3移除封禁，知错能改，就放过他们吧！");
+        Utils.sendMessage(sender, "§2✦ §b/lban mute <玩家名> <原因> §7- §3禁言玩家，让他们安静一会儿！");
+        Utils.sendMessage(sender, "§2✦ §b/lban unmute <玩家名> §7- §3解除禁言，让他们继续说话吧！");
+        Utils.sendMessage(sender, "§2✦ §b/lban list-mute §7- §3查看禁言列表，看看谁被胡桃禁言了！");
+        Utils.sendMessage(sender, "§2✦ §b/lban help §7- §3显示帮助信息，不懂就问，别装懂！");
+        Utils.sendMessage(sender, "§2✦ §b/lban open §7- §3打开可视化操作界面，胡桃带你看看风起的地方！");
+        Utils.sendMessage(sender, "§2✦ §b/lban getIP <玩家名> §7- §3查询玩家的 IP 地址，看看谁在捣乱！");
+        Utils.sendMessage(sender, "§2✦ §b/ban-ip <IP地址> <天数> <原因> §7- §3封禁 IP 地址，别再捣乱了！");
+        Utils.sendMessage(sender, "§2✦ §b/unban-ip <IP地址> §7- §3解除 IP 封禁，放过他们吧！");
+        Utils.sendMessage(sender, "§2✦ §b/lban warn <玩家名> <原因> §7- §3警告玩家，三次警告将自动封禁！");
+        Utils.sendMessage(sender, "§2✦ §b/lban unwarn <玩家名> §7- §3移除玩家的警告记录。");
+        Utils.sendMessage(sender, "§2✦ §b/lban check <玩家名/IP> §7- §3检查玩家或IP的封禁状态，看看谁在捣乱！");
+        Utils.sendMessage(sender, "§2✦ §b/lban language §7- §3打开语言选择页面，选择适合的语言进行操作！");
+        Utils.sendMessage(sender, "§2✦ §b/report <玩家名> <原因> §7- §3发现捣乱的家伙？快举报给胡桃，维护往生堂的和平！");
+        Utils.sendMessage(sender, "§7-> §2§l/report accept <举报编号> §7- §3受理举报，开始处理问题！");
+        Utils.sendMessage(sender, "§7-> §2§l/report close <举报编号> §7- §3关闭举报，问题已解决！");
+        Utils.sendMessage(sender, "§2✦ §b/kick <玩家名> <原因> §7- §3踢出捣乱的玩家！");
+        Utils.sendMessage(sender, "§2✦ §b/lban info §7- §3查看插件信息，了解当前运行状态，维护往生堂的和平！");
+        Utils.sendMessage(sender, "§b╚══════════════════════════════════╝");
+        Utils.sendMessage(sender, "§2♡ 当前版本: " + Lengbanlist.getInstance().getPluginVersion() + " §7| §b模型: 胡桃 HuTao");
     }
 
     @Override
     public String getKickMessage(String reason) {
-        return "§5╔══════════════════════════╗\n" +
-               "§5║   §d往生堂驱逐通知  §5║\n" +
-               "§5╠══════════════════════════╣\n" +
-               "§d⚰️ 你被胡桃踢出服务器啦！\n\n" +
+        return "§b╔══════════════════════════╗\n" +
+               "§b║   §d胡桃的驱逐通知  §b║\n" +
+               "§b╠══════════════════════════╣\n" +
+               "§d☠️ 你被胡桃踢出服务器啦！\n\n" +
                "§7原因: §f" + reason + "\n\n" +
-               "§d想回来记得找胡桃买棺材哦~\n" +
-               "§5╚══════════════════════════╝";
+               "§d下次请遵守规则哦~\n" +
+               "§b╚══════════════════════════╝";
     }
 
     @Override
     public String onKickSuccess(String playerName, String reason) {
-        return "§d✧ 胡桃说：§a" + playerName + " §e已被踢出！\n" +
-               "§5原因: §f" + reason + "\n" +
-               "§d调皮捣蛋可是要额外收费的~ §5(◕‿◕✿)";
+        return "§b✧ 胡桃说：§a" + playerName + " §e已被踢出！\n" +
+               "§b原因: §f" + reason + "\n" +
+               "§b维护往生堂的和平！§b(◕‿◕✿)";
     }
 
     @Override
     public String toggleBroadcast(boolean enabled) {
-        return "§d胡桃说：§a自动广播已经 " + (enabled ? "开启啦！" : "关闭啦！") + " 快来听听谁又倒霉啦！";
+        return "§b胡桃说：§a自动广播已经 " + (enabled ? "开启！" : "关闭！") + " 想听就听，不想听就关！";
     }
 
     @Override
     public String reloadConfig() {
-        return "§d胡桃说：§a配置重新加载完成！胡桃的大脑又清晰啦！";
+        return "§b胡桃说：§a配置重新加载完成！说不定能发现新东西！";
     }
 
     @Override
     public String addBan(String player, int days, String reason) {
-        return "§d胡桃说：§a" + player + " 已被加入往生堂黑名单！封禁 " + days + " 天，原因是：" + reason;
+        return "§b胡桃说：§a" + player + " 已被封禁 " + days + " 天，原因是：" + reason + "！不守规矩，就别怪胡桃无情！";
     }
 
     @Override
     public String removeBan(String player) {
-        return "§d胡桃说：§a" + player + " 已从往生堂黑名单中移除啦！知错能改，善莫大焉！";
+        return "§b胡桃说：§a" + player + " 已从封禁名单中移除。知错能改，就放过他们吧！";
     }
 
     @Override
     public String addMute(String player, String reason) {
-        return "§d胡桃说：§a" + player + " 已被禁言，原因是：" + reason + "！让他们安静一会儿吧！";
+        return "§b胡桃说：§a" + player + " 已被禁言，原因是：" + reason + "！让他们安静一会儿吧！";
     }
 
     @Override
     public String removeMute(String player) {
-        return "§d胡桃说：§a" + player + " 的禁言已解除，可以继续说话啦！";
+        return "§b胡桃说：§a" + player + " 的禁言已解除，可以继续说话了！";
     }
 
     @Override
     public String addBanIp(String ip, int days, String reason) {
-        return "§d胡桃说：§aIP " + ip + " 已被封禁 " + days + " 天，原因是：" + reason + "。别想再捣乱啦！";
+        return "§b胡桃说：§aIP " + ip + " 已被封禁 " + days + " 天，原因是：" + reason + "！别再捣乱了！";
     }
 
     @Override
     public String removeBanIp(String ip) {
-        return "§d胡桃说：§aIP " + ip + " 的封禁已解除，给他们一个机会！";
+        return "§b胡桃说：§aIP " + ip + " 的封禁已解除，放过他们吧！";
     }
 
     @Override
     public String addWarn(String player, String reason) {
-        return "§d胡桃说：§a玩家 " + player + " 已被警告，原因是：" + reason + "！警告三次将被自动封禁！";
+        return "§b胡桃说：§a玩家 " + player + " 已被警告，原因是：" + reason + "！警告三次将被自动封禁！";
     }
 
     @Override
     public String removeWarn(String player) {
-        return "§d胡桃说：§a玩家 " + player + " 的警告记录已移除。";
+        return "§b胡桃说：§a玩家 " + player + " 的警告记录已移除。";
     }
 }

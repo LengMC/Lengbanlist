@@ -11,6 +11,7 @@ import org.leng.utils.Utils;
 import org.leng.object.WarnEntry;
 
 import java.util.List;
+import java.util.Arrays;
 
 public class WarnCommand extends Command implements CommandExecutor {
     private final Lengbanlist plugin;
@@ -22,7 +23,6 @@ public class WarnCommand extends Command implements CommandExecutor {
 
     @Override
     public boolean execute(CommandSender sender, String s, String[] args) {
-        // 检查权限
         if (sender instanceof Player) {
             Player player = (Player) sender;
             if (!sender.isOp() && !player.hasPermission("lengban.warn")) {
@@ -31,34 +31,33 @@ public class WarnCommand extends Command implements CommandExecutor {
             }
         }
 
-        // 检查参数长度
-        if (args.length < 3) {
+        if (args.length < 2) {
             Utils.sendMessage(sender, plugin.prefix() + "§c用法错误: /lban warn <玩家名> <原因>");
             return false;
         }
 
-        String target = args[1];
-        String reason = String.join(" ", args).substring(args[0].length() + args[1].length() + 2);
+        String target = args[0];
+        String reason = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
 
-        // 获取当前模型
         Model currentModel = plugin.getModelManager().getCurrentModel();
         WarnManager warnManager = plugin.getWarnManager();
 
-        // 检查玩家是否已经被警告 3 次
-        List<WarnEntry> warnings = warnManager.getPlayerWarnings(target);
+        List<WarnEntry> warnings = warnManager.getActiveWarnings(target);
         if (warnings.size() >= 3) {
             Utils.sendMessage(sender, plugin.prefix() + "§c玩家 " + target + " 已被警告 3 次，无法继续警告。");
             return false;
         }
 
-        // 添加警告
-        warnManager.warnPlayer(target, sender.getName(), System.currentTimeMillis(), reason);
+        warnManager.warnPlayer(target, sender.getName(), reason);
         Utils.sendMessage(sender, currentModel.addWarn(target, reason));
 
-        // 检查警告次数是否达到 3 次
         if (warnings.size() + 1 >= 3) {
-            // 自动封禁玩家
-            plugin.getBanManager().banPlayer(new org.leng.object.BanEntry(target, sender.getName(), Long.MAX_VALUE, "警告次数过多"));
+            plugin.getBanManager().banPlayer(new org.leng.object.BanEntry(
+                target, 
+                "System", 
+                Long.MAX_VALUE, 
+                "警告次数过多", 
+                true));
             Utils.sendMessage(sender, plugin.prefix() + "§c警告次数过多，已自动封禁玩家 " + target + "。");
         }
 

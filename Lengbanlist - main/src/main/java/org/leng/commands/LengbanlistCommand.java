@@ -5,14 +5,14 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.Material;
 import org.bukkit.Sound;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.leng.Lengbanlist;
@@ -35,8 +35,12 @@ import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+
 public class LengbanlistCommand extends Command implements CommandExecutor, Listener {
     private final Lengbanlist plugin;
+    private final Gson gson = new Gson();
 
     public LengbanlistCommand(String name, Lengbanlist plugin) {
         super(name);
@@ -71,14 +75,12 @@ public class LengbanlistCommand extends Command implements CommandExecutor, List
                 int banCount = plugin.getBanManager().getBanList().size();
                 int banIpCount = plugin.getBanManager().getBanIpList().size();
 
-                // 计算总封禁数量
                 int totalBans = banCount + banIpCount;
 
-                // 替换占位符
                 String replacedMessage = defaultMessage
-                        .replace("%s", String.valueOf(banCount)) // 替换封禁玩家数量
-                        .replace("%i", String.valueOf(banIpCount)) // 替换封禁 IP 数量
-                        .replace("%t", String.valueOf(totalBans)); // 替换总封禁数量
+                        .replace("%s", String.valueOf(banCount))
+                        .replace("%i", String.valueOf(banIpCount))
+                        .replace("%t", String.valueOf(totalBans));
 
                 plugin.getServer().broadcastMessage(replacedMessage);
                 break;
@@ -90,35 +92,38 @@ public class LengbanlistCommand extends Command implements CommandExecutor, List
                 showBanList(sender);
                 break;
             case "reload":
-    if (!sender.hasPermission("lengbanlist.reload")) {
-        Utils.sendMessage(sender, plugin.prefix() + "§c不是你的工作喵！");
-        return true;
-    }
-    plugin.reloadConfig(); // 重新加载主配置文件
-    ModelManager.getInstance().reloadModel(); // 重新加载模型
+                if (!sender.hasPermission("lengbanlist.reload")) {
+                    Utils.sendMessage(sender, plugin.prefix() + "§c不是你的工作喵！");
+                    return true;
+                }
+                plugin.reloadConfig();
+                ModelManager.getInstance().reloadModel();
+                plugin.getLanguageManager().reloadLanguage();
 
-    // 重新加载语言设置
-    plugin.getLanguageManager().reloadLanguage();
-
-    File broadcastFile = new File(plugin.getDataFolder(), "broadcast.yml");
-    plugin.getServer().broadcastMessage(plugin.getConfig().getString("default-message").replace("%s", String.valueOf(plugin.getBanManager().getBanList().size())));
-    Utils.sendMessage(sender, currentModel.reloadConfig());
-    break;
-            case "add":
+                File broadcastFile = new File(plugin.getDataFolder(), "broadcast.yml");
+                plugin.getServer().broadcastMessage(plugin.getConfig().getString("default-message").replace("%s", String.valueOf(plugin.getBanManager().getBanList().size())));
+                Utils.sendMessage(sender, currentModel.reloadConfig());
+                break;
+                        case "add":
                 if (!sender.hasPermission("lengbanlist.ban")) {
                     Utils.sendMessage(sender, plugin.prefix() + "§c不是你的工作喵！");
                     return true;
                 }
                 if (args.length < 4) {
-                    Utils.sendMessage(sender, plugin.prefix() + "§c§l错误的命令格式，正确格式/lban add <玩家名/IP> <时间> <原因>");
+                    Utils.sendMessage(sender, plugin.prefix() + "§c§l命令格式错误，正确格式: /lban add <玩家名/IP> <时间> <原因>");
                     return true;
                 }
-                if (args[1].contains(".")) {
-                    plugin.getBanManager().banIp(new BanIpEntry(args[1], sender.getName(), TimeUtils.generateTimestampFromDays(Integer.parseInt(args[2])), args[3]));
-                    Utils.sendMessage(sender, currentModel.addBanIp(args[1], Integer.parseInt(args[2]), args[3]));
-                } else {
-                    plugin.getBanManager().banPlayer(new BanEntry(args[1], sender.getName(), TimeUtils.generateTimestampFromDays(Integer.parseInt(args[2])), args[3]));
-                    Utils.sendMessage(sender, currentModel.addBan(args[1], Integer.parseInt(args[2]), args[3]));
+                try {
+                    long duration = TimeUtils.parseTime(args[2]);
+                    if (args[1].contains(".")) {
+                        plugin.getBanManager().banIp(new BanIpEntry(args[1], sender.getName(), duration, args[3]));
+                        Utils.sendMessage(sender, currentModel.addBanIp(args[1], args[2], args[3]));
+                    } else {
+                        plugin.getBanManager().banPlayer(new BanEntry(args[1], sender.getName(), duration, args[3], false));
+                        Utils.sendMessage(sender, currentModel.addBan(args[1], args[2], args[3]));
+                    }
+                } catch (IllegalArgumentException e) {
+                    Utils.sendMessage(sender, plugin.prefix() + e.getMessage());
                 }
                 break;
             case "remove":
@@ -259,7 +264,7 @@ public class LengbanlistCommand extends Command implements CommandExecutor, List
                 }
                 String warnTarget = args[1];
                 String reason = String.join(" ", Arrays.copyOfRange(args, 2, args.length));
-                plugin.getWarnManager().warnPlayer(warnTarget, sender.getName(), System.currentTimeMillis(), reason);
+                plugin.getWarnManager().warnPlayer(warnTarget, sender.getName(), reason);
                 Utils.sendMessage(sender, currentModel.addWarn(warnTarget, reason));
                 break;
             case "unwarn":
@@ -272,7 +277,7 @@ public class LengbanlistCommand extends Command implements CommandExecutor, List
                     return true;
                 }
                 String unwarnTarget = args[1];
-                plugin.getWarnManager().unwarnPlayer(unwarnTarget);
+                plugin.getWarnManager().getActiveWarnings(unwarnTarget).forEach(warn -> plugin.getWarnManager().unwarnPlayer(unwarnTarget, warn.getId()));
                 Utils.sendMessage(sender, currentModel.removeWarn(unwarnTarget));
                 break;
             case "report":
@@ -325,11 +330,11 @@ public class LengbanlistCommand extends Command implements CommandExecutor, List
                 checkCommand.execute(sender, "check", new String[]{checkTarget});
                 break;
             case "info":
-    if (!sender.hasPermission("lengbanlist.info")) {
-        Utils.sendMessage(sender, plugin.prefix() + "§c不是你的工作喵！");
-        return true;
-    }
-    return new InfoCommand(plugin).onCommand(sender, null, "info", new String[0]);
+                if (!sender.hasPermission("lengbanlist.info")) {
+                    Utils.sendMessage(sender, plugin.prefix() + "§c不是你的工作喵！");
+                    return true;
+                }
+                return new InfoCommand(plugin).onCommand(sender, null, "info", new String[0]);
             case "language":
                 if (!sender.hasPermission("lengbanlist.language")) {
                     Utils.sendMessage(sender, plugin.prefix() + "§c不是你的工作喵！");
@@ -350,12 +355,10 @@ public class LengbanlistCommand extends Command implements CommandExecutor, List
     }
 
     private void handleReportAccept(CommandSender sender, String reportId) {
-        // 处理举报受理逻辑
         Utils.sendMessage(sender, plugin.prefix() + "§a举报受理成功，举报编号：" + reportId);
     }
 
     private void handleReportClose(CommandSender sender, String reportId) {
-        // 处理举报关闭逻辑
         Utils.sendMessage(sender, plugin.prefix() + "§a举报关闭成功，举报编号：" + reportId);
     }
 
@@ -400,25 +403,93 @@ public class LengbanlistCommand extends Command implements CommandExecutor, List
                 "§a切换自动广播 (" + (plugin.isBroadcastEnabled() ? "开启" : "关闭") + ")",
                 "§7/lban toggle",
                 "§7开启或关闭自动广播",
-                Sound.BLOCK_LEVER_CLICK
+                Sound.BLOCK_LEVER_CLICK,
+                player
         );
-        ItemStack broadcast = createItem("§a广播封禁人数", "§7/lban a", "§7广播当前封禁人数", Sound.BLOCK_NOTE_BLOCK_PLING);
-        ItemStack list = createItem("§a查看封禁名单", "§7/lban list", "§7查看被封禁的玩家列表", Sound.BLOCK_NOTE_BLOCK_HARP);
-        ItemStack reload = createItem("§a重新加载配置", "§7/lban reload", "§7重新加载插件配置", Sound.BLOCK_NOTE_BLOCK_BELL);
-        ItemStack addBan = createItem("§a添加封禁", "§7/lban add", "§7添加一个玩家到封禁名单", Sound.BLOCK_NOTE_BLOCK_BASS);
-        ItemStack removeBan = createItem("§a解除封禁", "§7/lban remove", "§7从封禁名单中移除一个玩家", Sound.BLOCK_NOTE_BLOCK_SNARE);
-        ItemStack help = createItem("§a帮助信息", "§7/lban help", "§7显示帮助信息", Sound.BLOCK_NOTE_BLOCK_FLUTE);
+        ItemStack broadcast = createItem(
+                "§a广播封禁人数", 
+                "§7/lban a", 
+                "§7广播当前封禁人数", 
+                Sound.BLOCK_NOTE_BLOCK_PLING,
+                player
+        );
+        ItemStack list = createItem(
+                "§a查看封禁名单", 
+                "§7/lban list", 
+                "§7查看被封禁的玩家列表", 
+                Sound.BLOCK_NOTE_BLOCK_HARP,
+                player
+        );
+        ItemStack reload = createItem(
+                "§a重新加载配置", 
+                "§7/lban reload", 
+                "§7重新加载插件配置", 
+                Sound.BLOCK_NOTE_BLOCK_BELL,
+                player
+        );
+        ItemStack addBan = createItem(
+                "§a添加封禁", 
+                "§7/lban add", 
+                "§7添加一个玩家到封禁名单", 
+                Sound.BLOCK_NOTE_BLOCK_BASS,
+                player
+        );
+        ItemStack removeBan = createItem(
+                "§a解除封禁", 
+                "§7/lban remove", 
+                "§7从封禁名单中移除一个玩家", 
+                Sound.BLOCK_NOTE_BLOCK_SNARE,
+                player
+        );
+        ItemStack help = createItem(
+                "§a帮助信息", 
+                "§7/lban help", 
+                "§7显示帮助信息", 
+                Sound.BLOCK_NOTE_BLOCK_FLUTE,
+                player
+        );
         ItemStack model = createItem(
                 "§a切换模型 (" + ModelManager.getInstance().getCurrentModelName() + ")",
                 "§7/lban model",
                 "§7当前模型: " + ModelManager.getInstance().getCurrentModelName(),
-                Sound.BLOCK_NOTE_BLOCK_CHIME
+                Sound.BLOCK_NOTE_BLOCK_CHIME,
+                player
         );
-        ItemStack sponsor = createItem("§6赞助作者", "§7点击打开赞助链接", "§7https://afdian.com/a/lengbanlist", Sound.BLOCK_NOTE_BLOCK_PLING);
-        ItemStack mute = createItem("§a禁言玩家", "§7/lban mute", "§7禁言一个玩家", Sound.BLOCK_NOTE_BLOCK_BASS);
-        ItemStack unmute = createItem("§a解除禁言", "§7/lban unmute", "§7解除一个玩家的禁言", Sound.BLOCK_NOTE_BLOCK_SNARE);
-        ItemStack listMute = createItem("§a查看禁言列表", "§7/lban list-mute", "§7查看被禁言的玩家列表", Sound.BLOCK_NOTE_BLOCK_HARP);
-        ItemStack language = createItem("§a语言选择", "§7/lban language", "§7选择语言", Sound.BLOCK_NOTE_BLOCK_PLING);
+        ItemStack sponsor = createItem(
+                "§6赞助作者", 
+                "§7点击打开赞助链接", 
+                "§7https://afdian.com/a/lengbanlist", 
+                Sound.BLOCK_NOTE_BLOCK_PLING,
+                player
+        );
+        ItemStack mute = createItem(
+                "§a禁言玩家", 
+                "§7/lban mute", 
+                "§7禁言一个玩家", 
+                Sound.BLOCK_NOTE_BLOCK_BASS,
+                player
+        );
+        ItemStack unmute = createItem(
+                "§a解除禁言", 
+                "§7/lban unmute", 
+                "§7解除一个玩家的禁言", 
+                Sound.BLOCK_NOTE_BLOCK_SNARE,
+                player
+        );
+        ItemStack listMute = createItem(
+                "§a查看禁言列表", 
+                "§7/lban list-mute", 
+                "§7查看被禁言的玩家列表", 
+                Sound.BLOCK_NOTE_BLOCK_HARP,
+                player
+        );
+        ItemStack language = createItem(
+                "§a语言选择", 
+                "§7/lban language", 
+                "§7选择语言", 
+                Sound.BLOCK_NOTE_BLOCK_PLING,
+                player
+        );
 
         // 设置按钮位置
         chest.setItem(10, toggleBroadcast);
@@ -438,7 +509,7 @@ public class LengbanlistCommand extends Command implements CommandExecutor, List
         player.openInventory(chest);
     }
 
-    private ItemStack createItem(String displayName, String command, String description, Sound sound) {
+    private ItemStack createItem(String displayName, String command, String description, Sound sound, Player player) {
         ItemStack item = new ItemStack(Material.PAPER);
         ItemMeta meta = item.getItemMeta();
         meta.setDisplayName(displayName);
@@ -448,12 +519,9 @@ public class LengbanlistCommand extends Command implements CommandExecutor, List
         meta.setLore(lore);
         item.setItemMeta(meta);
 
-        if (sound != null) {
+        if (sound != null && player != null) {
             Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                Player player = Bukkit.getPlayer(meta.getDisplayName());
-                if (player != null) {
-                    player.playSound(player.getLocation(), sound, 1.0f, 1.0f);
-                }
+                player.playSound(player.getLocation(), sound, 1.0f, 1.0f);
             }, 1L);
         }
 
@@ -482,16 +550,18 @@ public class LengbanlistCommand extends Command implements CommandExecutor, List
             }
             reader.close();
 
-            String jsonResponse = response.toString();
-            if (jsonResponse.contains("\"country_name\"")) {
-                String country = jsonResponse.split("\"country_name\":\"")[1].split("\"")[0];
-                String region = jsonResponse.split("\"region\":\"")[1].split("\"")[0];
-                String city = jsonResponse.split("\"city\":\"")[1].split("\"")[0];
-                return country + ", " + region + ", " + city;
-            } else {
-                plugin.getLogger().warning("API响应格式异常: " + jsonResponse);
+            JsonObject jsonObject = gson.fromJson(response.toString(), JsonObject.class);
+            
+            if (jsonObject.has("error")) {
+                plugin.getLogger().warning("IP API返回错误: " + jsonObject.get("reason").getAsString());
                 return null;
             }
+
+            String country = jsonObject.has("country_name") ? jsonObject.get("country_name").getAsString() : "未知国家";
+            String region = jsonObject.has("region") ? jsonObject.get("region").getAsString() : "未知地区";
+            String city = jsonObject.has("city") ? jsonObject.get("city").getAsString() : "未知城市";
+
+            return country + ", " + region + ", " + city;
         } catch (Exception e) {
             plugin.getLogger().warning("解析IP地理位置时出错: " + e.getMessage());
             return null;

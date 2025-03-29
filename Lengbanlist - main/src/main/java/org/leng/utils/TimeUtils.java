@@ -125,4 +125,21 @@ public class TimeUtils {
         }
         return sb.toString();
     }
+public static long daysToMillis(int days) {
+    return days * 24L * 60 * 60 * 1000;
+}
+
+public static String formatDuration(long millis) {
+    if (millis == Long.MAX_VALUE) return "永久";
+    
+    long seconds = millis / 1000;
+    long minutes = seconds / 60;
+    long hours = minutes / 60;
+    long days = hours / 24;
+    
+    if (days > 0) return days + "天";
+    if (hours > 0) return hours + "小时";
+    if (minutes > 0) return minutes + "分钟";
+    return seconds + "秒";
+}
 }

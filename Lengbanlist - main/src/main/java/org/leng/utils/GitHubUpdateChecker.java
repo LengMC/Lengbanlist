@@ -21,10 +21,10 @@ public class GitHubUpdateChecker {
 
     // 静态的备用 API 地址列表（选择响应时间较短的节点）
     private static final List<String> STATIC_API_URLS = Arrays.asList(
-            "https://ghproxy.com/https://api.github.com/repos/LengMC/Lengbanlist/releases/latest",
+            "https://ghfile.geekertao.top/https://github.com/repos/LengMC/Lengbanlist/releases/latest",
             "https://ghproxy.net/https://api.github.com/repos/LengMC/Lengbanlist/releases/latest",
-            "https://ghproxy.monkeyray.net/https://api.github.com/repos/LengMC/Lengbanlist/releases/latest",
-            "https://ghproxy.cc/https://api.github.com/repos/LengMC/Lengbanlist/releases/latest"
+            "https://gitproxy.click/https://github.com/repos/LengMC/Lengbanlist/releases/latest",
+            "https://github.proxy.class3.fun/https://github.com/repos/LengMC/Lengbanlist/releases/latest"
     );
 
     // 动态获取可用 API 的地址

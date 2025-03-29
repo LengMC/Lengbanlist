@@ -6,8 +6,10 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.leng.Lengbanlist;
 import org.leng.manager.WarnManager;
-import org.leng.models.Model;
+import org.leng.object.WarnEntry;
 import org.leng.utils.Utils;
+
+import java.util.List;
 
 public class UnwarnCommand extends Command implements CommandExecutor {
     private final Lengbanlist plugin;
@@ -29,24 +31,37 @@ public class UnwarnCommand extends Command implements CommandExecutor {
         }
 
         // 检查参数长度
-        if (args.length < 2) {
-            Utils.sendMessage(sender, plugin.prefix() + "§c用法错误: /lban unwarn <玩家名>");
+        if (args.length < 1) {
+            Utils.sendMessage(sender, plugin.prefix() + "§c用法错误: /lban unwarn <玩家名> [警告ID]");
             return false;
         }
 
-        String target = args[1];
+        String target = args[0];
         WarnManager warnManager = plugin.getWarnManager();
-        Model currentModel = plugin.getModelManager().getCurrentModel();
 
         // 检查玩家是否有警告记录
-        if (!warnManager.isPlayerWarned(target)) {
+        if (plugin.getWarnManager().getActiveWarnings(target).isEmpty()) {
             Utils.sendMessage(sender, plugin.prefix() + "§c玩家 " + target + " 没有警告记录。");
             return false;
         }
 
-        // 移除警告
-        warnManager.unwarnPlayer(target);
-        Utils.sendMessage(sender, currentModel.removeWarn(target));
+        // 如果有警告ID，移除特定警告
+        if (args.length > 1) {
+            try {
+                int warnId = Integer.parseInt(args[1]);
+                if (warnManager.unwarnPlayer(target, warnId)) {
+                    Utils.sendMessage(sender, "警告已移除");
+                } else {
+                    Utils.sendMessage(sender, "警告ID无效");
+                }
+            } catch (NumberFormatException e) {
+                Utils.sendMessage(sender, "警告ID必须是数字");
+            }
+        } else {
+            // 移除所有警告
+            plugin.getWarnManager().getActiveWarnings(target).forEach(warn -> plugin.getWarnManager().unwarnPlayer(target, Integer.parseInt(warn.getId())));
+            Utils.sendMessage(sender, "所有警告已移除");
+        }
 
         return true;
     }

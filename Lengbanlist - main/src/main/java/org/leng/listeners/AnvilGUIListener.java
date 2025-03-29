@@ -104,7 +104,7 @@ public class AnvilGUIListener implements Listener {
                 Utils.sendMessage(player, "§a成功封禁IP：" + playerID + "，时长：" + time + "，原因：" + input);
             } else {
                 // 封禁玩家
-                plugin.getBanManager().banPlayer(new BanEntry(playerID, player.getName(), banTimestamp, input));
+                plugin.getBanManager().banPlayer(new BanEntry(playerID, player.getName(), banTimestamp, input, false)); // 添加 isAuto 参数
                 Utils.sendMessage(player, "§a成功封禁玩家：" + playerID + "，时长：" + time + "，原因：" + input);
             }
 
@@ -137,39 +137,39 @@ public class AnvilGUIListener implements Listener {
     }
 
     private void handleMute(Player player, InventoryClickEvent event, String currentStep) {
-    ItemStack item = event.getInventory().getItem(0);
-    if (item == null || item.getItemMeta() == null) {
-        return;
-    }
+        ItemStack item = event.getInventory().getItem(0);
+        if (item == null || item.getItemMeta() == null) {
+            return;
+        }
 
-    String input = item.getItemMeta().getDisplayName();
+        String input = item.getItemMeta().getDisplayName();
 
-    if (currentStep.equals("playerID")) {
-        player.setMetadata("lengbanlist-playerID", new FixedMetadataValue(plugin, input));
-        openAnvilForMute(player, "reason");
-    } else if (currentStep.equals("reason")) {
-        String playerID = player.getMetadata("lengbanlist-playerID").get(0).asString();
-        MuteEntry muteEntry = new MuteEntry(playerID, player.getName(), System.currentTimeMillis(), input);
-        plugin.getMuteManager().mutePlayer(muteEntry);
-        Utils.sendMessage(player, "§a成功禁言玩家：" + playerID + "，原因：" + input);
-        player.removeMetadata("lengbanlist-action", plugin);
-        player.removeMetadata("lengbanlist-step", plugin);
-        player.removeMetadata("lengbanlist-playerID", plugin);
+        if (currentStep.equals("playerID")) {
+            player.setMetadata("lengbanlist-playerID", new FixedMetadataValue(plugin, input));
+            openAnvilForMute(player, "reason");
+        } else if (currentStep.equals("reason")) {
+            String playerID = player.getMetadata("lengbanlist-playerID").get(0).asString();
+            MuteEntry muteEntry = new MuteEntry(playerID, player.getName(), System.currentTimeMillis(), input);
+            plugin.getMuteManager().mutePlayer(muteEntry);
+            Utils.sendMessage(player, "§a成功禁言玩家：" + playerID + "，原因：" + input);
+            player.removeMetadata("lengbanlist-action", plugin);
+            player.removeMetadata("lengbanlist-step", plugin);
+            player.removeMetadata("lengbanlist-playerID", plugin);
+        }
     }
-}
 
     private void handleUnmute(Player player, InventoryClickEvent event) {
-    ItemStack item = event.getInventory().getItem(0);
-    if (item == null || item.getItemMeta() == null) {
-        return;
+        ItemStack item = event.getInventory().getItem(0);
+        if (item == null || item.getItemMeta() == null) {
+            return;
+        }
+
+        String playerID = item.getItemMeta().getDisplayName();
+
+        plugin.getMuteManager().unmutePlayer(playerID);
+        Utils.sendMessage(player, "§a成功解除禁言玩家：" + playerID);
+        player.removeMetadata("lengbanlist-action", plugin);
     }
-
-    String playerID = item.getItemMeta().getDisplayName();
-
-    plugin.getMuteManager().unmutePlayer(playerID);
-    Utils.sendMessage(player, "§a成功解除禁言玩家：" + playerID);
-    player.removeMetadata("lengbanlist-action", plugin);
-}
 
     private void handleIPBan(Player player, InventoryClickEvent event, String currentStep) {
         ItemStack item = event.getInventory().getItem(0);

@@ -64,10 +64,10 @@ public class CheckCommand extends Command implements CommandExecutor {
         String uuid = player.getUniqueId().toString();
         long lastLogin = player.getLastPlayed();
         String lastLoginTime = lastLogin == 0 ? "从未登录" : TimeUtils.timestampToReadable(lastLogin);
-        boolean isMuted = plugin.getMuteManager().isPlayerMuted(playerName);
-        boolean isBanned = plugin.getBanManager().isPlayerBanned(playerName);
+        boolean isMuted = plugin.getMuteManager().isPlayerMuted(uuid);
+        boolean isBanned = plugin.getBanManager().isPlayerBanned(uuid);
         boolean isOp = player.isOp();
-        List<WarnEntry> warnings = plugin.getWarnManager().getPlayerWarnings(playerName);
+        List<WarnEntry> warnings = plugin.getWarnManager().getActiveWarnings(playerName);
 
         Utils.sendMessage(sender, plugin.prefix() + "§a玩家信息：");
         Utils.sendMessage(sender, plugin.prefix() + "§b玩家名: " + playerName);

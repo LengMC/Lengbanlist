@@ -1,16 +1,22 @@
 package org.leng.object;
 
+import java.util.UUID;
+
 public class WarnEntry {
-    private String player; // 被警告的玩家
-    private String staff;  // 执行警告的管理员
-    private long time;     // 警告时间
-    private String reason; // 警告原因
+    private final String id; // 添加一个唯一的标识符
+    private final String player;
+    private final String staff;
+    private final long time;
+    private String reason;
+    private boolean revoked;
 
     public WarnEntry(String player, String staff, long time, String reason) {
+        this.id = UUID.randomUUID().toString(); // 自动生成一个唯一的标识符
         this.player = player;
         this.staff = staff;
         this.time = time;
         this.reason = reason;
+        this.revoked = false;
     }
 
     public String getPlayer() {
@@ -29,7 +35,19 @@ public class WarnEntry {
         return reason;
     }
 
+    public boolean isRevoked() {
+        return revoked;
+    }
+
+    public String getId() {
+        return id;
+    }
+
     public void setReason(String reason) {
         this.reason = reason;
+    }
+
+    public void revoke() {
+        this.revoked = true;
     }
 }
