@@ -40,30 +40,52 @@ public class UnwarnCommand extends Command implements CommandExecutor {
         WarnManager warnManager = plugin.getWarnManager();
 
         // 检查玩家是否有警告记录
-        if (plugin.getWarnManager().getActiveWarnings(target).isEmpty()) {
+        if (warnManager.getActiveWarnings(target).isEmpty()) {
             Utils.sendMessage(sender, plugin.prefix() + "§c玩家 " + target + " 没有警告记录。");
             return false;
         }
 
-        // 如果有警告ID，移除特定警告
-        if (args.length > 1) {
-            try {
-                int warnId = Integer.parseInt(args[1]);
-                if (warnManager.unwarnPlayer(target, warnId)) {
-                    Utils.sendMessage(sender, "警告已移除");
+        try {
+            // 如果有警告ID，移除特定警告
+            if (args.length > 1) {
+                int warnId = parseWarnId(args[1], warnManager.getActiveWarnings(target));
+                if (warnId != -1 && warnManager.unwarnPlayer(target, warnId)) {
+                    Utils.sendMessage(sender, plugin.prefix() + "§a警告 #" + warnId + " 已移除");
                 } else {
-                    Utils.sendMessage(sender, "警告ID无效");
+                    Utils.sendMessage(sender, plugin.prefix() + "§c警告ID无效或已被移除");
                 }
-            } catch (NumberFormatException e) {
-                Utils.sendMessage(sender, "警告ID必须是数字");
+            } else {
+                // 移除所有警告
+                List<WarnEntry> warnings = warnManager.getActiveWarnings(target);
+                for (int i = 0; i < warnings.size(); i++) {
+                    warnManager.unwarnPlayer(target, i + 1); // 警告ID从1开始
+                }
+                Utils.sendMessage(sender, plugin.prefix() + "§a已移除玩家 " + target + " 的所有警告");
             }
-        } else {
-            // 移除所有警告
-            plugin.getWarnManager().getActiveWarnings(target).forEach(warn -> plugin.getWarnManager().unwarnPlayer(target, Integer.parseInt(warn.getId())));
-            Utils.sendMessage(sender, "所有警告已移除");
+        } catch (Exception e) {
+            Utils.sendMessage(sender, plugin.prefix() + "§c处理警告时出错: " + e.getMessage());
+            return false;
         }
 
         return true;
+    }
+
+    private int parseWarnId(String input, List<WarnEntry> warnings) {
+        try {
+            // 尝试解析为数字ID
+            int id = Integer.parseInt(input);
+            if (id > 0 && id <= warnings.size()) {
+                return id;
+            }
+        } catch (NumberFormatException e) {
+            // 如果不是数字，尝试匹配UUID
+            for (int i = 0; i < warnings.size(); i++) {
+                if (warnings.get(i).getId().equalsIgnoreCase(input)) {
+                    return i + 1; // 返回基于1的索引
+                }
+            }
+        }
+        return -1;
     }
 
     @Override
