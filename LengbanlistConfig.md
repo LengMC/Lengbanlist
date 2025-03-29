@@ -1,3 +1,4 @@
+```
 prefix: "§f§l[§bLengbanlist§f§l]"
 sendtime: 5 #已分钟为单位
 opensendtime: true #开启循环播报封禁人数
@@ -16,3 +17,4 @@ database:
     database: "lengbanlist"
     username: "root"
     password: "password"
+```
