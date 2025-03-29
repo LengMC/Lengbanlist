@@ -52,10 +52,12 @@ public class WarnCommand extends Command implements CommandExecutor {
         Utils.sendMessage(sender, currentModel.addWarn(target, reason));
 
         if (warnings.size() + 1 >= 3) {
+            // 使用WarnManager的计算方法而不是硬编码永久封禁
+            long banDuration = plugin.getWarnManager().calculateBanDuration(1); // 第一次触发
             plugin.getBanManager().banPlayer(new org.leng.object.BanEntry(
                 target, 
                 "System", 
-                Long.MAX_VALUE, 
+                System.currentTimeMillis() + banDuration, 
                 "警告次数过多", 
                 true));
             Utils.sendMessage(sender, plugin.prefix() + "§c警告次数过多，已自动封禁玩家 " + target + "。");

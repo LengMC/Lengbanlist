@@ -53,6 +53,11 @@ public class BanCommand implements CommandExecutor {
             }
         }
 
+        // 修复显示0天实际1天的问题
+        if (banTimestamp < TimeUtils.daysToMillis(1) && banTimestamp > 0) {
+            banTimestamp = TimeUtils.daysToMillis(1);
+        }
+
         BanEntry entry = new BanEntry(
                 args[0], 
                 sender.getName(), 
@@ -80,31 +85,34 @@ public class BanCommand implements CommandExecutor {
     }
 
     private void sendBanResult(CommandSender sender, String player, long banTimestamp, boolean isAuto, String timeString) {
-        String duration = isAuto ? TimeUtils.formatDuration(banTimestamp) : 
-                         (banTimestamp == Long.MAX_VALUE ? "永久" : timeString);
+        String duration;
+        if (banTimestamp == Long.MAX_VALUE) {
+            duration = "永久";
+        } else {
+            long remainingDays = (banTimestamp - System.currentTimeMillis()) / TimeUtils.daysToMillis(1);
+            // 确保至少显示1天
+            remainingDays = Math.max(1, remainingDays);
+            duration = remainingDays + "天";
+        }
         
         String message = String.format("§l§a成功封禁 玩家: %s，时长: %s%s",
                 player, 
                 duration,
                 isAuto ? " §6<auto>" : "");
 
-        if (banTimestamp == Long.MAX_VALUE) {
-            message = "§l§a成功永久封禁 玩家: " + player + (isAuto ? " §6<auto>" : "");
-        }
-
         Utils.sendMessage(sender, message);
     }
 
     private long calculateAutoBanTime(String playerName) {
-        int warnCount = plugin.getWarnManager().getActiveWarnings(playerName).size();
+        int warnCount = Math.max(0, plugin.getWarnManager().getActiveWarnings(playerName).size());
         
         switch (warnCount) {
-            case 0:  return System.currentTimeMillis() + TimeUtils.daysToMillis(1);
-            case 1:  return System.currentTimeMillis() + TimeUtils.daysToMillis(3);
-            case 2:  return System.currentTimeMillis() + TimeUtils.daysToMillis(7);
-            case 3:  return System.currentTimeMillis() + TimeUtils.daysToMillis(14);
-            case 4:  return System.currentTimeMillis() + TimeUtils.daysToMillis(30);
-            default: return Long.MAX_VALUE;
+            case 0:  return TimeUtils.daysToMillis(1);  // 无警告记录也封1天
+            case 1:  return TimeUtils.daysToMillis(3);
+            case 2:  return TimeUtils.daysToMillis(7);
+            case 3:  return TimeUtils.daysToMillis(14);
+            case 4:  return TimeUtils.daysToMillis(30);
+            default: return Long.MAX_VALUE; // 只有超过4次才永久
         }
     }
 }

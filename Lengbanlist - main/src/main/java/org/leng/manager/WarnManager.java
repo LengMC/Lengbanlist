@@ -14,28 +14,24 @@ public class WarnManager {
     private final List<WarnEntry> warnList = Collections.synchronizedList(new ArrayList<>());
     private final Map<String, Integer> autoBanCounter = new ConcurrentHashMap<>();
 
-    // 警告玩家
     public void warnPlayer(String player, String staff, String reason) {
         WarnEntry entry = new WarnEntry(player, staff, System.currentTimeMillis(), reason);
         warnList.add(entry);
         checkAutoBan(player);
     }
 
-    // 获取玩家所有警告（包括已撤销的）
     public List<WarnEntry> getAllWarnings(String playerName) {
         return warnList.stream()
                 .filter(e -> e.getPlayer().equalsIgnoreCase(playerName))
                 .collect(Collectors.toList());
     }
 
-    // 获取玩家有效警告（未撤销的）
     public List<WarnEntry> getActiveWarnings(String playerName) {
         return warnList.stream()
                 .filter(e -> e.getPlayer().equalsIgnoreCase(playerName) && !e.isRevoked())
                 .collect(Collectors.toList());
     }
 
-    // 撤销特定警告
     public boolean unwarnPlayer(String playerName, int warnId) {
         List<WarnEntry> playerWarnings = getAllWarnings(playerName);
         if (warnId > 0 && warnId <= playerWarnings.size()) {
@@ -48,7 +44,6 @@ public class WarnManager {
         return false;
     }
 
-    // 检查自动封禁
     private void checkAutoBan(String player) {
         long now = System.currentTimeMillis();
         long timeWindow = 30L * 24 * 60 * 60 * 1000; // 30天时间窗口
@@ -84,7 +79,7 @@ public class WarnManager {
         }
     }
 
-    private long calculateBanDuration(int triggerCount) {
+    public long calculateBanDuration(int triggerCount) {
         switch (triggerCount) {
             case 1: return TimeUtils.daysToMillis(1);
             case 2: return TimeUtils.daysToMillis(7);
@@ -95,12 +90,27 @@ public class WarnManager {
         }
     }
 
-    // 持久化方法
     public void loadFromConfig(FileConfiguration config) {
-        // 实现配置加载
+        warnList.clear();
+        for (String entry : config.getStringList("warnings")) {
+            String[] parts = entry.split(":");
+            if (parts.length >= 5) {
+                WarnEntry warn = new WarnEntry(parts[0], parts[1], Long.parseLong(parts[2]), parts[3]);
+                if (Boolean.parseBoolean(parts[4])) {
+                    warn.revoke();
+                }
+                warnList.add(warn);
+            }
+        }
     }
 
     public void saveToConfig(FileConfiguration config) {
-        // 实现配置保存
+        List<String> warnings = new ArrayList<>();
+        for (WarnEntry entry : warnList) {
+            warnings.add(entry.getPlayer() + ":" + entry.getStaff() + ":" + 
+                        entry.getTime() + ":" + entry.getReason() + ":" + 
+                        entry.isRevoked());
+        }
+        config.set("warnings", warnings);
     }
 }
