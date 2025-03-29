@@ -2,12 +2,12 @@
 
 简体中文 | [English](README_en.md)
 
-![Lengbanlist](<url id="cvju1b3lmiubpmn88rb0" type="url" status="parsed" title="Lengbanlist/Photos/Lengbanlist.png at main · LengMC/Lengbanlist" wc="840">https://github.com/LengMC/Lengbanlist/blob/main/Photos/Lengbanlist.png</url> )
-![Lengbanlist](<url id="cvju1b3lmiubpmn88rbg" type="url" status="failed" title="" wc="0">https://bstats.org/signatures/bukkit/Lengbanlist.svg</url> )
+![Lengbanlist](https://github.com/LengMC/Lengbanlist/blob/main/Photos/Lengbanlist.png)
+![Lengbanlist](https://bstats.org/signatures/bukkit/Lengbanlist.svg)
 
 ## 简介
-[![Minecraft Version](<url id="cvju1b3lmiubpmn88rc0" type="url" status="failed" title="" wc="0">https://img.shields.io/badge/Minecraft-1.21.x-brightgreen</url> )](<url id="cvju1b3lmiubpmn88rcg" type="url" status="parsed" title="欢迎来到 Minecraft 官方网站" wc="1581">https://www.minecraft.net</url> )
-[![License](<url id="cvju1b3lmiubpmn88rd0" type="url" status="failed" title="" wc="0">https://img.shields.io/badge/License-MPL2.0-blue</url> )](LICENSE)
+[![Minecraft Version](https://img.shields.io/badge/Minecraft-1.21.x-brightgreen)](https://www.minecraft.net)
+[![License](https://img.shields.io/badge/License-MPL2.0-blue)](LICENSE)
 
 Lengbanlist 是一款专为高版本 Minecraft 服务器设计的插件，它通过本地封禁名单（banlist）在聊天栏实时广播封禁信息，帮助管理员及时通知玩家，提升服务器管理的透明度和效率。
 
@@ -36,18 +36,18 @@ Lengbanlist 是一款专为高版本 Minecraft 服务器设计的插件，它通
 
 开发者：darkpath2011, xiaoshaziYA  
 特别感谢：darkpath2011  
-![Lengbanlist](<url id="cvju1b3lmiubpmn88rdg" type="url" status="parsed" title="Lengbanlist/Photos/114514.gif at main · LengMC/Lengbanlist" wc="835">https://github.com/LengMC/Lengbanlist/blob/main/Photos/114514.gif</url> )
+![Lengbanlist](https://github.com/LengMC/Lengbanlist/blob/main/Photos/114514.gif)
 
 # 欢迎支持我的项目！❤️
 
 如果你喜欢我的项目，或者它对你有帮助，欢迎通过以下方式支持我！你的支持将帮助我继续开发和维护这些项目，同时也能激励我创作更多有趣的内容。
 
 ## 赞助方式
-- [爱发电](<url id="cvju1b3lmiubpmn88rf0" type="url" status="parsed" title="冷猫猫正在创作无聊的Leng x MineCraft插件 | 爱发电" wc="1853">https://afdian.com/a/lengbanlist</url> )：通过爱发电支持我，你可以选择一次性打赏或每月支持，帮助我更好地进行创作和项目开发。
+- [爱发电](https://afdian.com/a/lengbanlist)：通过爱发电支持我，你可以选择一次性打赏或每月支持，帮助我更好地进行创作和项目开发。
 
 ## 赞助徽章
 你也可以通过以下徽章快速支持我：
 
-[![爱发电 Sponsor](<url id="cvju1b3lmiubpmn88reg" type="url" status="failed" title="" wc="0">https://img.shields.io/badge/%E7%88%B1%E5%8F%91%E7%94%B5-%E6%94%AF%E6%8C%81%E6%88%91-orange</url> )](<url id="cvju1b3lmiubpmn88rf0" type="url" status="parsed" title="冷猫猫正在创作无聊的Leng x MineCraft插件 | 爱发电" wc="1853">https://afdian.com/a/lengbanlist</url> )
+[![爱发电 Sponsor](https://img.shields.io/badge/%E7%88%B1%E5%8F%91%E7%94%B5-%E6%94%AF%E6%8C%81%E6%88%91-orange)](https://afdian.com/a/lengbanlist)
 
 感谢你的支持！❤️
