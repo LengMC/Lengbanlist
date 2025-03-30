@@ -1,21 +1,21 @@
-name: Build Plugin
+name: Build and Release Plugin
 
 on:
   push:
     branches:
-      - main  # 指定触发编译的分支
+      - main
 
 jobs:
-  build:
-    runs-on: ubuntu-latest  # 使用最新的Ubuntu环境
+  build-and-release:
+    runs-on: ubuntu-latest
     permissions:
-      contents: read  # 只读取仓库内容
-      pull-requests: write  # 允许写入拉取请求
-      issues: write  # 允许写入问题
+      contents: write
+      pull-requests: write
+      issues: write
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4  # 检出代码
+        uses: actions/checkout@v4
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -23,12 +23,38 @@ jobs:
           java-version: '17'
           distribution: 'adopt'
 
-      - name: Build with Maven
-        run: mvn clean package  # 使用Maven进行编译打包
-        working-directory: ${{ github.workspace }}/Lengbanlist - main  # 使用绝对路径
+      - name: Extract Version Numbers
+        id: version
+        run: |
+          FULL_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          BASE_VERSION=$(echo $FULL_VERSION | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')
+          
+          echo "Full Version: $FULL_VERSION"
+          echo "Base Version: $BASE_VERSION"
+          
+          echo "full_version=$FULL_VERSION" >> $GITHUB_OUTPUT
+          echo "base_version=$BASE_VERSION" >> $GITHUB_OUTPUT
 
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+      - name: Build with Maven
+        run: mvn clean package
+        working-directory: ${{ github.workspace }}/Lengbanlist - main
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
         with:
-          name: plugin  # 构建产物的名称
-          path: ${{ github.workspace }}/Lengbanlist - main/target/  # 使用绝对路径
+          tag_name: ${{ steps.version.outputs.base_version }}  # 纯数字tag (1.6.7)
+          name: Lengbanlist ${{ steps.version.outputs.full_version }}  # 显示完整版本名
+          body: |
+            ### 版本信息
+            - 完整版本: ${{ steps.version.outputs.full_version }}
+            - 基础版本: ${{ steps.version.outputs.base_version }}
+            
+            ### 更新内容
+            自动生成的发布版本
+          files: |
+            ${{ github.workspace }}/Lengbanlist - main/target/Lengbanlist - ${{ steps.version.outputs.base_version }}.jar
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
