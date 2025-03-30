@@ -15,18 +15,3 @@
  - 如果是造成重大事故的，请使用邮箱联系！[mailto:mc_xiaoshazi@qq.com]
 ---
 谢谢！
-### Lengbanlist | 冷禁列表
-当前已在多平台上线
-github:
-https://github.com/LengMC/Lengbanlist
----
-spigotmc:
-https://www.spigotmc.org/resources/lengbanlist-%E5%86%B7%E7%A6%81%E5%88%97%E8%A1%A8.123623/
----
-modrinth:
-https://modrinth.com/plugin/lengbanlist
----
-主要更新地址：
-https://github.com/LengMC/Lengbanlist/releases
----
-欢迎给个stars，帮助本插件进一步推广谢谢各位！
