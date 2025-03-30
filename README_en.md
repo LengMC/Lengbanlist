@@ -1,6 +1,7 @@
 # Lengbanlist Plugin
 
-[简体中文](README.md) | English
+- *[简体中文](README.md) | English*
+- **[Popularize](readme-website.md)**
 
 ![Lengbanlist](https://github.com/LengMC/Lengbanlist/blob/main/Photos/Lengbanlist.png)
 ![Lengbanlist](https://bstats.org/signatures/bukkit/Lengbanlist.svg)
