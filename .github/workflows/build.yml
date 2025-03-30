@@ -26,7 +26,11 @@ jobs:
       - name: Extract Version Numbers
         id: version
         run: |
+          # 先进入项目目录再执行Maven命令
+          cd "${{ github.workspace }}/Lengbanlist - main"
+          # 从 pom.xml 提取版本号
           FULL_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          # 提取纯数字版本
           BASE_VERSION=$(echo $FULL_VERSION | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')
           
           echo "Full Version: $FULL_VERSION"
@@ -42,19 +46,10 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ steps.version.outputs.base_version }}  # 纯数字tag (1.6.7)
-          name: Lengbanlist ${{ steps.version.outputs.full_version }}  # 显示完整版本名
-          body: |
-            ### 版本信息
-            - 完整版本: ${{ steps.version.outputs.full_version }}
-            - 基础版本: ${{ steps.version.outputs.base_version }}
-            
-            ### 更新内容
-            自动生成的发布版本
+          tag_name: ${{ steps.version.outputs.base_version }}
+          name: Lengbanlist ${{ steps.version.outputs.full_version }}
           files: |
             ${{ github.workspace }}/Lengbanlist - main/target/Lengbanlist - ${{ steps.version.outputs.base_version }}.jar
-          draft: false
-          prerelease: false
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
