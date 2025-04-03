@@ -74,7 +74,6 @@ public class LengbanlistCommand extends Command implements CommandExecutor, List
                 String defaultMessage = plugin.getBroadcastFC().getString("default-message");
                 int banCount = plugin.getBanManager().getBanList().size();
                 int banIpCount = plugin.getBanManager().getBanIpList().size();
-
                 int totalBans = banCount + banIpCount;
 
                 String replacedMessage = defaultMessage
@@ -102,8 +101,8 @@ public class LengbanlistCommand extends Command implements CommandExecutor, List
 
                 File broadcastFile = new File(plugin.getDataFolder(), "broadcast.yml");
                 plugin.getServer().broadcastMessage(
-                    plugin.getConfig().getString("default-message")
-                        .replace("%s", String.valueOf(plugin.getBanManager().getBanList().size()))
+                        plugin.getConfig().getString("default-message")
+                                .replace("%s", String.valueOf(plugin.getBanManager().getBanList().size()))
                 );
                 Utils.sendMessage(sender, currentModel.reloadConfig());
                 break;
@@ -271,7 +270,7 @@ public class LengbanlistCommand extends Command implements CommandExecutor, List
                     return true;
                 }
                 if (args.length < 3) {
-                    Utils.sendMessage(sender, plugin.prefix() + "§c§l错误的命令格式，正确格式：/lban warn <玩家名> <原因>");
+                    Utils.sendMessage(sender, plugin.prefix() + "§c§l错误的命令格式，正确格式：/lban warn <玩家名/IP> <原因>");
                     return true;
                 }
                 String warnTarget = args[1];
@@ -279,55 +278,55 @@ public class LengbanlistCommand extends Command implements CommandExecutor, List
                 plugin.getWarnManager().warnPlayer(warnTarget, sender.getName(), reason);
                 Utils.sendMessage(sender, currentModel.addWarn(warnTarget, reason));
                 break;
-case "unwarn":
-    if (!sender.hasPermission("lengbanlist.unwarn")) {
-        Utils.sendMessage(sender, plugin.prefix() + "§c不是你的工作喵！");
-        return true;
-    }
-    if (args.length < 2) {
-        Utils.sendMessage(sender, plugin.prefix() + "§c§l错误的命令格式，正确格式：/lban unwarn <玩家名>");
-        return true;
-    }
-    String unwarnTarget = args[1];
-    plugin.getWarnManager().getActiveWarnings(unwarnTarget).forEach(warn -> {
-        try {
-            int warnId = Integer.parseInt(warn.getId()); // 字符串转整数
-            plugin.getWarnManager().unwarnPlayer(unwarnTarget, warnId);
-        } catch (NumberFormatException e) {
-            Utils.sendMessage(sender, plugin.prefix() + "§c警告ID格式错误: " + warn.getId());
-        }
-    });
-    Utils.sendMessage(sender, currentModel.removeWarn(unwarnTarget));
-    break;
-case "report":
-    if (!sender.hasPermission("lengbanlist.report")) {
-        Utils.sendMessage(sender, plugin.prefix() + "§c你没有权限使用此命令。");
-        return true;
-    }
-    if (args.length < 2) {
-        Utils.sendMessage(sender, plugin.prefix() + "§c用法错误: /report <子命令> <参数>");
-        return true;
-    }
-    switch (args[1].toLowerCase()) {
-        case "accept":
-            if (args.length < 3) {
-                Utils.sendMessage(sender, plugin.prefix() + "§c用法错误: /report accept <举报编号>");
-                return true;
-            }
-            handleReportAccept(sender, args[2]); // 传递String参数
-            break;
-        case "close":
-            if (args.length < 3) {
-                Utils.sendMessage(sender, plugin.prefix() + "§c用法错误: /report close <举报编号>");
-                return true;
-            }
-            handleReportClose(sender, args[2]); // 传递String参数
-            break;
-        default:
-            Utils.sendMessage(sender, plugin.prefix() + "§c未知的子命令: " + args[1]);
-            break;
-    }
-    break;
+            case "unwarn":
+                if (!sender.hasPermission("lengbanlist.unwarn")) {
+                    Utils.sendMessage(sender, plugin.prefix() + "§c不是你的工作喵！");
+                    return true;
+                }
+                if (args.length < 2) {
+                    Utils.sendMessage(sender, plugin.prefix() + "§c§l错误的命令格式，正确格式：/lban unwarn <玩家名>");
+                    return true;
+                }
+                String unwarnTarget = args[1];
+                plugin.getWarnManager().getActiveWarnings(unwarnTarget).forEach(warn -> {
+                    try {
+                        int warnId = Integer.parseInt(warn.getId()); // 字符串转整数
+                        plugin.getWarnManager().unwarnPlayer(unwarnTarget, warnId);
+                    } catch (NumberFormatException e) {
+                        Utils.sendMessage(sender, plugin.prefix() + "§c警告ID格式错误: " + warn.getId());
+                    }
+                });
+                Utils.sendMessage(sender, currentModel.removeWarn(unwarnTarget));
+                break;
+            case "report":
+                if (!sender.hasPermission("lengbanlist.report")) {
+                    Utils.sendMessage(sender, plugin.prefix() + "§c你没有权限使用此命令。");
+                    return true;
+                }
+                if (args.length < 2) {
+                    Utils.sendMessage(sender, plugin.prefix() + "§c用法错误: /report <子命令> <参数>");
+                    return true;
+                }
+                switch (args[1].toLowerCase()) {
+                    case "accept":
+                        if (args.length < 3) {
+                            Utils.sendMessage(sender, plugin.prefix() + "§c用法错误: /report accept <举报编号>");
+                            return true;
+                        }
+                        handleReportAccept(sender, args[2]); // 传递String参数
+                        break;
+                    case "close":
+                        if (args.length < 3) {
+                            Utils.sendMessage(sender, plugin.prefix() + "§c用法错误: /report close <举报编号>");
+                            return true;
+                        }
+                        handleReportClose(sender, args[2]); // 传递String参数
+                        break;
+                    default:
+                        Utils.sendMessage(sender, plugin.prefix() + "§c未知的子命令: " + args[1]);
+                        break;
+                }
+                break;
             case "admin":
                 if (!sender.hasPermission("lengbanlist.admin")) {
                     Utils.sendMessage(sender, plugin.prefix() + "§c不是你的工作喵！");
@@ -641,6 +640,9 @@ private void handleReportClose(CommandSender sender, String reportIdStr) {
                     break;
                 case "/lban list-mute":
                     player.performCommand("lban list-mute");
+                    break;
+                case "/lban language":
+                    player.performCommand("lban language");
                     break;
                 default:
                     player.performCommand(command);
