@@ -2,7 +2,6 @@
 prefix: "§f§l[§bLengbanlist§f§l]"
 sendtime: 5 #已分钟为单位
 opensendtime: true #开启循环播报封禁人数
-muted:
 Model: "Default"
 valid-models: "Default HuTao Furina Zhongli Keqing Xiao Ayaka Zero Herta"
 language: "default" # 当前默认语言，可选值：default, en_US
