@@ -31,9 +31,12 @@ jobs:
           BASE_VERSION=$(echo $FULL_VERSION | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')
           echo "full_version=$FULL_VERSION" >> $GITHUB_OUTPUT
           echo "base_version=$BASE_VERSION" >> $GITHUB_OUTPUT
+          echo "JAR file will be named: Lengbanlist-${BASE_VERSION}-${{ steps.timestamp.outputs.timestamp }}.jar"
 
       - name: Build with Maven
-        run: mvn clean package
+        run: |
+          mvn clean package
+          ls -l target/  # 列出 target 目录的内容，确保 JAR 文件存在
         working-directory: ${{ github.workspace }}/Lengbanlist - main
 
       - name: Generate Timestamp
@@ -41,13 +44,18 @@ jobs:
         run: |
           echo "timestamp=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_OUTPUT
 
+      - name: Check Release File Path
+        run: |
+          echo "Checking file path: ${{ github.workspace }}/Lengbanlist - main/target/Lengbanlist-${{ steps.version.outputs.base_version }}-${{ steps.timestamp.outputs.timestamp }}.jar"
+          ls -l "${{ github.workspace }}/Lengbanlist - main/target/"
+
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ steps.version.outputs.base_version }}
           name: Lengbanlist ${{ steps.version.outputs.full_version }}
           files: |
-            ${{ github.workspace }}/Lengbanlist - main/target/Lengbanlist - ${{ steps.version.outputs.base_version }}-${{ steps.timestamp.outputs.timestamp }}.jar
+            "${{ github.workspace }}/Lengbanlist - main/target/Lengbanlist-${{ steps.version.outputs.base_version }}-${{ steps.timestamp.outputs.timestamp }}.jar"
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
