@@ -5,7 +5,7 @@
 
     <groupId>org.leng</groupId>
     <artifactId>Lengbanlist</artifactId>
-    <version>1.6.8-NextGen</version>
+    <version>1.6.9-NextGen</version>
 
     <name>Lengbanlist</name>
 
@@ -56,13 +56,13 @@
         <dependency>
     <groupId>org.json</groupId>
     <artifactId>json</artifactId>
-    <version>20231013</version> 
+    <version>20240310</version> 
 </dependency>
     </dependencies>
 
     <build>
         <defaultGoal>clean package</defaultGoal>
-        <finalName>Lengbanlist - 1.6.8</finalName>
+        <finalName>Lengbanlist - 1.6.9</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

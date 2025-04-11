@@ -12,12 +12,11 @@ import org.leng.Lengbanlist;
 
 import java.io.File;
 import java.io.FileReader;
-import java.io.IOException;
 import java.io.BufferedReader;
+import java.io.IOException;
 import org.json.JSONObject;
-import org.json.JSONArray;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Arrays;
 
 public class LanguageManager {
     private final Lengbanlist plugin;
@@ -34,12 +33,12 @@ public class LanguageManager {
      */
     public void switchLanguage(Player player, String languageCode) {
         // 检查语言文件是否存在
-        File languageFile = new File(plugin.getDataFolder(), "language/" + languageCode + ".yml");
+        File languageFile = new File(plugin.getDataFolder(), "language/" + languageCode + ".json");
         if (!languageFile.exists()) {
             plugin.getLogger().warning("语言文件不存在: " + languageFile.getName());
             // 回退到默认语言
             languageCode = "default";
-            languageFile = new File(plugin.getDataFolder(), "language/default.yml");
+            languageFile = new File(plugin.getDataFolder(), "language/default.json");
         }
 
         // 加载语言文件
@@ -57,13 +56,24 @@ public class LanguageManager {
      */
     private void loadLanguageFile(File languageFile) {
         try {
-            FileConfiguration languageConfig = YamlConfiguration.loadConfiguration(languageFile);
-            plugin.getConfig().set("prefix", languageConfig.getString("prefix", "§7[Lengbanlist] "));
-            plugin.getConfig().set("language_changed", languageConfig.getString("language_changed", "§a语言已切换为: %language%"));
-            plugin.getConfig().set("help_header", languageConfig.getString("help_header", "§bLengbanlist §2§o帮助信息 - 默认风格:"));
-            plugin.getConfig().set("help_commands", languageConfig.getConfigurationSection("help_commands"));
-            plugin.getConfig().set("version_info", languageConfig.getString("version_info", "§6当前版本: %version%"));
-            plugin.getConfig().set("hitokoto", languageConfig.getString("hitokoto", "§d%hitokoto%"));
+            StringBuilder content = new StringBuilder();
+            BufferedReader reader = new BufferedReader(new FileReader(languageFile));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                content.append(line);
+            }
+            reader.close();
+
+            // 解析 JSON 数据
+            JSONObject languageConfig = new JSONObject(content.toString());
+
+            // 更新配置文件
+            plugin.getConfig().set("prefix", languageConfig.optString("prefix", "§7[Lengbanlist] "));
+            plugin.getConfig().set("language_changed", languageConfig.optString("language_changed", "§a语言已切换为: %language%"));
+            plugin.getConfig().set("help_header", languageConfig.optString("help_header", "§bLengbanlist §2§o帮助信息 - 默认风格:"));
+            plugin.getConfig().set("help_commands", languageConfig.optJSONObject("help_commands"));
+            plugin.getConfig().set("version_info", languageConfig.optString("version_info", "§6当前版本: %version%"));
+            plugin.getConfig().set("hitokoto", languageConfig.optString("hitokoto", "§d%hitokoto%"));
             plugin.saveConfig();
         } catch (Exception e) {
             plugin.getLogger().warning("无法加载语言文件: " + languageFile.getName());
@@ -79,11 +89,11 @@ public class LanguageManager {
         String defaultLanguage = config.getString("language", "default");
 
         // 加载默认语言文件
-        File languageFile = new File(plugin.getDataFolder(), "language/" + defaultLanguage + ".yml");
+        File languageFile = new File(plugin.getDataFolder(), "language/" + defaultLanguage + ".json");
         if (!languageFile.exists()) {
             plugin.getLogger().warning("默认语言文件不存在: " + languageFile.getName());
             defaultLanguage = "default";
-            languageFile = new File(plugin.getDataFolder(), "language/default.yml");
+            languageFile = new File(plugin.getDataFolder(), "language/default.json");
         }
 
         loadLanguageFile(languageFile);

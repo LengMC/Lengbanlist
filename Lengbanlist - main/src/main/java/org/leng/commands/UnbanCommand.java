@@ -20,7 +20,7 @@ public class UnbanCommand extends Command implements CommandExecutor {
         // 检查权限
         if (sender instanceof Player) {
             Player player = (Player) sender;
-            if (!sender.isOp() || !(player.hasPermission("lengban.unban"))) {
+            if (!sender.isOp() || !(player.hasPermission("lengbanlist.unban"))) {
                 Utils.sendMessage(sender, "§c你没有权限使用此命令。");
                 return false;
             }

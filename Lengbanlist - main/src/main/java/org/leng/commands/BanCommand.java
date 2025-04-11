@@ -23,7 +23,7 @@ public class BanCommand implements CommandExecutor {
         // 权限检查
         if (sender instanceof Player) {
             Player player = (Player) sender;
-            if (!sender.isOp() && !player.hasPermission("lengban.ban")) {
+            if (!sender.isOp() && !player.hasPermission("lengbanlist.ban")) {
                 Utils.sendMessage(sender, "§c你没有权限使用此命令。");
                 return false;
             }

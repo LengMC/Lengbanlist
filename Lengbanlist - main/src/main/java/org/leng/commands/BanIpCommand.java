@@ -21,7 +21,7 @@ public class BanIpCommand extends Command implements CommandExecutor {
         // 检查权限
         if (sender instanceof Player) {
             Player player = (Player) sender;
-            if (!sender.isOp() || !(player.hasPermission("lengban.banip"))) {
+            if (!sender.isOp() || !(player.hasPermission("lengbanlist.banip"))) {
                 Utils.sendMessage(sender, "§c你没有权限使用此命令。");
                 return false;
             }

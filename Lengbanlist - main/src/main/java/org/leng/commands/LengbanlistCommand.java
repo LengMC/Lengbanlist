@@ -298,35 +298,43 @@ public class LengbanlistCommand extends Command implements CommandExecutor, List
                 });
                 Utils.sendMessage(sender, currentModel.removeWarn(unwarnTarget));
                 break;
-            case "report":
-                if (!sender.hasPermission("lengbanlist.report")) {
-                    Utils.sendMessage(sender, plugin.prefix() + "§c你没有权限使用此命令。");
-                    return true;
-                }
-                if (args.length < 2) {
-                    Utils.sendMessage(sender, plugin.prefix() + "§c用法错误: /report <子命令> <参数>");
-                    return true;
-                }
-                switch (args[1].toLowerCase()) {
-                    case "accept":
-                        if (args.length < 3) {
-                            Utils.sendMessage(sender, plugin.prefix() + "§c用法错误: /report accept <举报编号>");
-                            return true;
-                        }
-                        handleReportAccept(sender, args[2]); // 传递String参数
-                        break;
-                    case "close":
-                        if (args.length < 3) {
-                            Utils.sendMessage(sender, plugin.prefix() + "§c用法错误: /report close <举报编号>");
-                            return true;
-                        }
-                        handleReportClose(sender, args[2]); // 传递String参数
-                        break;
-                    default:
-                        Utils.sendMessage(sender, plugin.prefix() + "§c未知的子命令: " + args[1]);
-                        break;
-                }
-                break;
+        case "report":
+            if (!(sender instanceof Player)) {
+                Utils.sendMessage(sender, plugin.prefix() + "§c此命令只能由玩家执行。");
+                return true;
+            }
+            Player player = (Player) sender;
+
+            if (args.length < 2) {
+                Utils.sendMessage(sender, plugin.prefix() + "§c用法错误: /report <子命令> <参数> 或 /report <ID> <原因>");
+                return true;
+            }
+
+            switch (args[1].toLowerCase()) {
+                case "accept":
+                    if (args.length < 3) {
+                        Utils.sendMessage(sender, plugin.prefix() + "§c用法错误: /report accept <举报编号>");
+                        return true;
+                    }
+                    handleAccept(player, args[2]);
+                    break;
+                case "close":
+                    if (args.length < 3) {
+                        Utils.sendMessage(sender, plugin.prefix() + "§c用法错误: /report close <举报编号>");
+                        return true;
+                    }
+                    handleClose(player, args[2]);
+                    break;
+                default:
+                    // 处理直接提交举报的逻辑
+                    if (args.length < 3) {
+                        Utils.sendMessage(sender, plugin.prefix() + "§c用法错误: /report <ID> <原因>");
+                        return true;
+                    }
+                    handleReportSubmit(player, args[1], String.join(" ", Arrays.copyOfRange(args, 2, args.length)));
+                    break;
+            }
+            break;
             case "admin":
                 if (!sender.hasPermission("lengbanlist.admin")) {
                     Utils.sendMessage(sender, plugin.prefix() + "§c不是你的工作喵！");
@@ -353,18 +361,18 @@ public class LengbanlistCommand extends Command implements CommandExecutor, List
                     return true;
                 }
                 return new InfoCommand(plugin).onCommand(sender, null, "info", new String[0]);
-            case "language":
-                if (!sender.hasPermission("lengbanlist.language")) {
-                    Utils.sendMessage(sender, plugin.prefix() + "§c不是你的工作喵！");
-                    return true;
-                }
-                if (sender instanceof Player) {
-                    Player player = (Player) sender;
-                    plugin.getLanguageManager().openLanguageSelectionUI(player);
-                } else {
-                    Utils.sendMessage(sender, plugin.prefix() + "§c此命令只能由玩家执行。");
-                }
-                break;
+case "language":
+    if (!sender.hasPermission("lengbanlist.language")) {
+        Utils.sendMessage(sender, plugin.prefix() + "§c不是你的工作喵！");
+        return true;
+    }
+    if (sender instanceof Player) {
+        Player languagePlayer = (Player) sender;
+        plugin.getLanguageManager().openLanguageSelectionUI(languagePlayer);
+    } else {
+        Utils.sendMessage(sender, plugin.prefix() + "§c此命令只能由玩家执行。");
+    }
+    break;
             default:
                 Utils.sendMessage(sender, plugin.prefix() + "§c你说的啥啊喵？喵喵看不懂~");
                 break;
@@ -372,23 +380,28 @@ public class LengbanlistCommand extends Command implements CommandExecutor, List
         return true;
     }
 
-private void handleReportAccept(CommandSender sender, String reportIdStr) {
+private void handleAccept(Player player, String reportIdStr) {
     try {
         int reportId = Integer.parseInt(reportIdStr);
-        Utils.sendMessage(sender, plugin.prefix() + "§a举报受理成功，举报编号：" + reportId);
+        Utils.sendMessage(player, plugin.prefix() + "§a举报受理成功，举报编号：" + reportId);
     } catch (NumberFormatException e) {
-        Utils.sendMessage(sender, plugin.prefix() + "§c无效的举报编号: " + reportIdStr);
+        Utils.sendMessage(player, plugin.prefix() + "§c无效的举报编号: " + reportIdStr);
     }
 }
 
-private void handleReportClose(CommandSender sender, String reportIdStr) {
+private void handleClose(Player player, String reportIdStr) {
     try {
         int reportId = Integer.parseInt(reportIdStr);
-        Utils.sendMessage(sender, plugin.prefix() + "§a举报关闭成功，举报编号：" + reportId);
+        Utils.sendMessage(player, plugin.prefix() + "§a举报关闭成功，举报编号：" + reportId);
     } catch (NumberFormatException e) {
-        Utils.sendMessage(sender, plugin.prefix() + "§c无效的举报编号: " + reportIdStr);
+        Utils.sendMessage(player, plugin.prefix() + "§c无效的举报编号: " + reportIdStr);
     }
 }
+
+private void handleReportSubmit(Player player, String target, String reason) {
+    Utils.sendMessage(player, plugin.prefix() + "§a举报已提交: " + target + " - " + reason);
+}
+
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {

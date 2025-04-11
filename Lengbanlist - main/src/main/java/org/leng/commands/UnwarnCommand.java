@@ -24,7 +24,7 @@ public class UnwarnCommand extends Command implements CommandExecutor {
         // 检查权限
         if (sender instanceof Player) {
             Player player = (Player) sender;
-            if (!sender.isOp() && !player.hasPermission("lengban.unwarn")) {
+            if (!sender.isOp() && !player.hasPermission("lengbanlist.unwarn")) {
                 Utils.sendMessage(sender, plugin.prefix() + "§c你没有权限使用此命令。");
                 return false;
             }

@@ -190,8 +190,8 @@ public void onEnable() {
         }
 
         // 直接写入默认语言文件内容
-        writeDefaultLanguageFile("default.yml", getDefaultLanguageContent());
-        writeDefaultLanguageFile("en_US.yml", getEnUSLanguageContent());
+        writeDefaultLanguageFile("default.json", getDefaultLanguageContent());
+        writeDefaultLanguageFile("en_US.json", getEnUSLanguageContent());
     }
 
     // 写入默认语言文件

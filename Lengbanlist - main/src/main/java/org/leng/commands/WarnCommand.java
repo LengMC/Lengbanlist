@@ -25,7 +25,7 @@ public class WarnCommand extends Command implements CommandExecutor {
     public boolean execute(CommandSender sender, String s, String[] args) {
         if (sender instanceof Player) {
             Player player = (Player) sender;
-            if (!sender.isOp() && !player.hasPermission("lengban.warn")) {
+            if (!sender.isOp() && !player.hasPermission("lengbanlist.warn")) {
                 Utils.sendMessage(sender, plugin.prefix() + "§c你没有权限使用此命令。");
                 return false;
             }
