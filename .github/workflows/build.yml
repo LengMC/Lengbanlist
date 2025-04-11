@@ -1,17 +1,16 @@
-name: Build and Release Plugin
+name: Build and Upload Plugin
 
 on:
   push:
-    branches:
-      - main
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
-  build-and-release:
+  build-and-upload:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
-      pull-requests: write
-      issues: write
+      contents: read
 
     steps:
       - name: Checkout repository
@@ -21,7 +20,13 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: '17'
-          distribution: 'adopt'
+          distribution: 'temurin'
+
+      - name: Build with Maven
+        run: |
+          mvn clean package
+          ls -l target/  # 列出 target 目录的内容，确保 JAR 文件存在
+        working-directory: ${{ github.workspace }}/Lengbanlist - main
 
       - name: Extract Version Numbers
         id: version
@@ -33,29 +38,64 @@ jobs:
           echo "base_version=$BASE_VERSION" >> $GITHUB_OUTPUT
           echo "JAR file will be named: Lengbanlist-${BASE_VERSION}-${{ steps.timestamp.outputs.timestamp }}.jar"
 
-      - name: Build with Maven
-        run: |
-          mvn clean package
-          ls -l target/  # 列出 target 目录的内容，确保 JAR 文件存在
-        working-directory: ${{ github.workspace }}/Lengbanlist - main
-
       - name: Generate Timestamp
         id: timestamp
         run: |
           echo "timestamp=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_OUTPUT
 
-      - name: Check Release File Path
+      - name: Create Artifact Directory
         run: |
-          echo "Checking file path: ${{ github.workspace }}/Lengbanlist - main/target/Lengbanlist-${{ steps.version.outputs.base_version }}-${{ steps.timestamp.outputs.timestamp }}.jar"
-          ls -l "${{ github.workspace }}/Lengbanlist - main/target/"
+          mkdir -p ${{ github.workspace }}/artifacts
 
-      - name: Create Release
-        uses: softprops/action-gh-release@v1
+      - name: Copy JAR to Artifact Directory
+        run: |
+          cp "${{ github.workspace }}/Lengbanlist - main/target/Lengbanlist-${{ steps.version.outputs.base_version }}-${{ steps.timestamp.outputs.timestamp }}.jar" ${{ github.workspace }}/artifacts/
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4.3.3
         with:
-          tag_name: ${{ steps.version.outputs.base_version }}
-          name: Lengbanlist ${{ steps.version.outputs.full_version }}
-          files: |
-            "${{ github.workspace }}/Lengbanlist - main/target/Lengbanlist-${{ steps.version.outputs.base_version }}-${{ steps.timestamp.outputs.timestamp }}.jar"
-          generate_release_notes: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          name: Lengbanlist-${{ steps.version.outputs.base_version }}-${{ steps.timestamp.outputs.timestamp }}.jar
+          path: ${{ github.workspace }}/artifacts/
+
+      - name: Upload to KStore
+        run: |
+          cd ${{ github.workspace }}/artifacts
+
+          # 创建存储目录
+          RESPONSE=$(curl --location --request POST "https://api.kstore.space/api/v1/file/create" \
+            --header "X-GitHub-Event: workflow_run" \
+            --header "User-Agent: Apifox/1.0.0 (https://apifox.com)" \
+            --form "access_token=${{ secrets.OSS }}" \
+            --form "fileId=0" \
+            --form "name=Lengbanlist-${{ steps.version.outputs.base_version }}-${{ steps.timestamp.outputs.timestamp }}.jar")
+
+          DIR_ID=$(echo "$RESPONSE" | jq -r '.data.id')
+          echo "DirectoryId: $DIR_ID"
+
+          # 上传文件
+          UPLOAD_RESPONSE=$(curl --location --request POST "https://upload.kstore.space/upload/$DIR_ID?access_token=${{ secrets.OSS }}" \
+            -F "file=@Lengbanlist-${{ steps.version.outputs.base_version }}-${{ steps.timestamp.outputs.timestamp }}.jar")
+
+          DOWNLOAD_URL=$(echo "$UPLOAD_RESPONSE" | jq -r '.data.downloadUrl')
+          FILE_ID=$(echo "$UPLOAD_RESPONSE" | jq -r '.data.id')
+
+          echo "FileId: $FILE_ID"
+          echo "URL: $DOWNLOAD_URL"
+
+          # 设为直接下载
+          RESPONSE=$(curl --location --request POST "https://api.kstore.cc/api/v1/file/direct?access_token=${{ secrets.OSS }}" \
+            --form "fileId=$FILE_ID" \
+            --form "isDirect=1")
+
+          echo "$RESPONSE"
+
+          # 版本推送
+          curl --get \
+          --data-urlencode "key=${{ secrets.API_KEY }}" \
+          --data-urlencode "commit=${{ github.sha }}" \
+          --data-urlencode "branch=${{ github.ref }}" \
+          --data-urlencode "version=${{ steps.version.outputs.full_version }}" \
+          --data-urlencode "date=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+          --data-urlencode "link=$DOWNLOAD_URL" \
+          --data-urlencode "release=false" \
+          "https://service.fpsmaster.top/pushVersion"
