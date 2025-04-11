@@ -47,9 +47,19 @@ jobs:
         run: |
           mkdir -p ${{ github.workspace }}/artifacts
 
+      - name: Debug: List Target Directory
+        run: |
+          ls -l "${{ github.workspace }}/Lengbanlist - main/target/"
+
       - name: Copy JAR to Artifact Directory
         run: |
-          cp "${{ github.workspace }}/Lengbanlist - main/target/Lengbanlist-${{ steps.version.outputs.base_version }}-${{ steps.timestamp.outputs.timestamp }}.jar" ${{ github.workspace }}/artifacts/
+          JAR_PATH="${{ github.workspace }}/Lengbanlist - main/target/Lengbanlist-${{ steps.version.outputs.base_version }}-${{ steps.timestamp.outputs.timestamp }}.jar"
+          if [ -f "$JAR_PATH" ]; then
+            cp "$JAR_PATH" ${{ github.workspace }}/artifacts/
+          else
+            echo "Error: JAR file not found at $JAR_PATH"
+            exit 1
+          fi
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4.3.3
