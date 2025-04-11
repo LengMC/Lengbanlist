@@ -47,10 +47,6 @@ jobs:
         run: |
           mkdir -p ${{ github.workspace }}/artifacts
 
-      - name: Debug: List Target Directory
-        run: |
-          ls -l "${{ github.workspace }}/Lengbanlist - main/target/"
-
       - name: Copy JAR to Artifact Directory
         run: |
           JAR_PATH="${{ github.workspace }}/Lengbanlist - main/target/Lengbanlist-${{ steps.version.outputs.base_version }}-${{ steps.timestamp.outputs.timestamp }}.jar"
@@ -109,3 +105,33 @@ jobs:
           --data-urlencode "link=$DOWNLOAD_URL" \
           --data-urlencode "release=false" \
           "https://service.fpsmaster.top/pushVersion"
+
+      - name: Generate Build Summary
+        run: |
+          echo "## Build Summary" > build_summary.md
+          echo "### Commit: ${{ github.sha }}" >> build_summary.md
+          echo "### Branch: ${{ github.ref }}" >> build_summary.md
+          echo "### Version: ${{ steps.version.outputs.full_version }}" >> build_summary.md
+          echo "### Timestamp: ${{ steps.timestamp.outputs.timestamp }}" >> build_summary.md
+          echo "### Download URL: $DOWNLOAD_URL" >> build_summary.md
+          echo "### Build Time: $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> build_summary.md
+
+          # Get commit message
+          COMMIT_MESSAGE=$(git log -1 --pretty=%B)
+          echo "### Commit Message:" >> build_summary.md
+          echo "\`\`\`" >> build_summary.md
+          echo "$COMMIT_MESSAGE" >> build_summary.md
+          echo "\`\`\`" >> build_summary.md
+
+          # Get changed files
+          CHANGED_FILES=$(git diff --name-only HEAD~1)
+          echo "### Changed Files:" >> build_summary.md
+          echo "\`\`\`" >> build_summary.md
+          echo "$CHANGED_FILES" >> build_summary.md
+          echo "\`\`\`" >> build_summary.md
+
+      - name: Upload Build Summary
+        uses: actions/upload-artifact@v4.3.3
+        with:
+          name: build_summary.md
+          path: build_summary.md
