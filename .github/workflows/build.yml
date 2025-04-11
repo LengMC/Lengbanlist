@@ -13,9 +13,11 @@ jobs:
       contents: read
 
     steps:
-      # 第一步：检出代码仓库
+      # 第一步：检出代码仓库（获取完整历史记录）
       - name: 检出仓库
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 2  # 获取最近2个提交，确保HEAD~1可用
 
       # 第二步：设置 JDK 17 环境
       - name: 设置 JDK 17
@@ -121,7 +123,7 @@ jobs:
           --data-urlencode "release=false" \
           "https://service.fpsmaster.top/pushVersion"
 
-      # 第九步：生成构建摘要
+      # 第九步：生成构建摘要（修复版）
       - name: 生成构建摘要
         run: |
           echo "## 构建摘要" > build_summary.md
@@ -138,11 +140,21 @@ jobs:
           echo "$COMMIT_MESSAGE" >> build_summary.md
           echo "\`\`\`" >> build_summary.md
 
-          # 获取变更文件列表
-          CHANGED_FILES=$(git diff --name-only HEAD~1)
+          # 改进的变更文件获取逻辑
           echo "### 变更文件:" >> build_summary.md
           echo "\`\`\`" >> build_summary.md
-          echo "$CHANGED_FILES" >> build_summary.md
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            # 对于PR，比较基础分支和当前分支
+            git diff --name-only ${{ github.event.pull_request.base.sha }}..${{ github.sha }} || echo "无法获取PR变更文件"
+          else
+            # 对于push，尝试获取与上一次提交的差异
+            if git rev-parse HEAD~1 >/dev/null 2>&1; then
+              git diff --name-only HEAD~1 || echo "无法获取变更文件"
+            else
+              echo "首次提交或浅克隆，显示所有文件:"
+              git ls-files
+            fi
+          fi
           echo "\`\`\`" >> build_summary.md
 
       # 第十步：上传构建摘要
