@@ -1,4 +1,4 @@
-name: Build and Upload Plugin
+name: 构建并上传插件
 
 on:
   push:
@@ -13,61 +13,84 @@ jobs:
       contents: read
 
     steps:
-      - name: Checkout repository
+      # 第一步：检出代码仓库
+      - name: 检出仓库
         uses: actions/checkout@v4
 
-      - name: Set up JDK 17
+      # 第二步：设置 JDK 17 环境
+      - name: 设置 JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Build with Maven
+      # 第三步：使用 Maven 构建项目
+      - name: Maven 构建
         run: |
           mvn clean package
-          ls -l target/  # 列出 target 目录的内容，确保 JAR 文件存在
-        working-directory: ${{ github.workspace }}/Lengbanlist - main
+          ls -l target/  # 列出 target 目录内容用于调试
+        working-directory: "${{ github.workspace }}/Lengbanlist - main"  # 注意带空格的路径要用引号包裹
 
-      - name: Extract Version Numbers
+      # 第四步：提取版本号信息
+      - name: 提取版本号
         id: version
         run: |
           cd "${{ github.workspace }}/Lengbanlist - main"
+          # 获取完整版本号
           FULL_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          # 提取基础版本号 (去掉可能存在的后缀)
           BASE_VERSION=$(echo $FULL_VERSION | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')
           echo "full_version=$FULL_VERSION" >> $GITHUB_OUTPUT
           echo "base_version=$BASE_VERSION" >> $GITHUB_OUTPUT
-          echo "JAR file will be named: Lengbanlist-${BASE_VERSION}-${{ steps.timestamp.outputs.timestamp }}.jar"
+          echo "生成的JAR文件名: Lengbanlist-${BASE_VERSION}-${{ steps.timestamp.outputs.timestamp }}.jar"
 
-      - name: Generate Timestamp
+      # 第五步：生成时间戳
+      - name: 生成时间戳
         id: timestamp
         run: |
           echo "timestamp=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_OUTPUT
 
-      - name: Create Artifact Directory
+      # 第六步：创建制品目录
+      - name: 创建制品目录
         run: |
-          mkdir -p ${{ github.workspace }}/artifacts
+          mkdir -p "${{ github.workspace }}/artifacts"
 
-      - name: Copy JAR to Artifact Directory
+      # 第七步：查找并复制JAR文件（修复了路径问题）
+      - name: 复制JAR文件
         run: |
-          JAR_PATH="${{ github.workspace }}/Lengbanlist - main/target/Lengbanlist-${{ steps.version.outputs.base_version }}-${{ steps.timestamp.outputs.timestamp }}.jar"
-          if [ -f "$JAR_PATH" ]; then
-            cp "$JAR_PATH" ${{ github.workspace }}/artifacts/
-          else
-            echo "Error: JAR file not found at $JAR_PATH"
+          # 定义工作目录（处理带空格的路径）
+          WORKSPACE="${{ github.workspace }}/Lengbanlist - main/target"
+          echo "正在搜索JAR文件，目录: $WORKSPACE"
+          
+          # 调试：列出目录内容
+          ls -la "$WORKSPACE"
+          
+          # 查找最新的JAR文件（按修改时间排序）
+          JAR_FILE=$(find "$WORKSPACE" -name "Lengbanlist-*.jar" -type f -printf "%T+ %p\n" | sort -r | head -n 1 | awk '{print $2}')
+          
+          if [ -z "$JAR_FILE" ]; then
+            echo "错误: 在 $WORKSPACE 目录中未找到JAR文件"
             exit 1
           fi
+          
+          echo "找到JAR文件: $JAR_FILE"
+          # 复制到制品目录并重命名
+          cp "$JAR_FILE" "${{ github.workspace }}/artifacts/Lengbanlist-${{ steps.version.outputs.base_version }}-${{ steps.timestamp.outputs.timestamp }}.jar"
 
-      - name: Upload Artifact
+      # 第八步：上传制品到GitHub
+      - name: 上传制品
         uses: actions/upload-artifact@v4.3.3
         with:
           name: Lengbanlist-${{ steps.version.outputs.base_version }}-${{ steps.timestamp.outputs.timestamp }}.jar
-          path: ${{ github.workspace }}/artifacts/
+          path: "${{ github.workspace }}/artifacts/Lengbanlist-${{ steps.version.outputs.base_version }}-${{ steps.timestamp.outputs.timestamp }}.jar"
 
-      - name: Upload to KStore
+      # 第九步：上传到KStore存储
+      - name: 上传到KStore
         run: |
-          cd ${{ github.workspace }}/artifacts
+          cd "${{ github.workspace }}/artifacts"
 
           # 创建存储目录
+          echo "正在创建KStore目录..."
           RESPONSE=$(curl --location --request POST "https://api.kstore.space/api/v1/file/create" \
             --header "X-GitHub-Event: workflow_run" \
             --header "User-Agent: Apifox/1.0.0 (https://apifox.com)" \
@@ -76,26 +99,29 @@ jobs:
             --form "name=Lengbanlist-${{ steps.version.outputs.base_version }}-${{ steps.timestamp.outputs.timestamp }}.jar")
 
           DIR_ID=$(echo "$RESPONSE" | jq -r '.data.id')
-          echo "DirectoryId: $DIR_ID"
+          echo "创建的目录ID: $DIR_ID"
 
           # 上传文件
+          echo "正在上传文件..."
           UPLOAD_RESPONSE=$(curl --location --request POST "https://upload.kstore.space/upload/$DIR_ID?access_token=${{ secrets.OSS }}" \
             -F "file=@Lengbanlist-${{ steps.version.outputs.base_version }}-${{ steps.timestamp.outputs.timestamp }}.jar")
 
           DOWNLOAD_URL=$(echo "$UPLOAD_RESPONSE" | jq -r '.data.downloadUrl')
           FILE_ID=$(echo "$UPLOAD_RESPONSE" | jq -r '.data.id')
 
-          echo "FileId: $FILE_ID"
-          echo "URL: $DOWNLOAD_URL"
+          echo "文件ID: $FILE_ID"
+          echo "下载URL: $DOWNLOAD_URL"
 
-          # 设为直接下载
+          # 设置为直接下载
+          echo "设置直接下载权限..."
           RESPONSE=$(curl --location --request POST "https://api.kstore.cc/api/v1/file/direct?access_token=${{ secrets.OSS }}" \
             --form "fileId=$FILE_ID" \
             --form "isDirect=1")
 
           echo "$RESPONSE"
 
-          # 版本推送
+          # 推送版本信息
+          echo "推送版本信息到服务器..."
           curl --get \
           --data-urlencode "key=${{ secrets.API_KEY }}" \
           --data-urlencode "commit=${{ github.sha }}" \
@@ -106,31 +132,33 @@ jobs:
           --data-urlencode "release=false" \
           "https://service.fpsmaster.top/pushVersion"
 
-      - name: Generate Build Summary
+      # 第十步：生成构建摘要
+      - name: 生成构建摘要
         run: |
-          echo "## Build Summary" > build_summary.md
-          echo "### Commit: ${{ github.sha }}" >> build_summary.md
-          echo "### Branch: ${{ github.ref }}" >> build_summary.md
-          echo "### Version: ${{ steps.version.outputs.full_version }}" >> build_summary.md
-          echo "### Timestamp: ${{ steps.timestamp.outputs.timestamp }}" >> build_summary.md
-          echo "### Download URL: $DOWNLOAD_URL" >> build_summary.md
-          echo "### Build Time: $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> build_summary.md
+          echo "## 构建摘要" > build_summary.md
+          echo "### 提交哈希: ${{ github.sha }}" >> build_summary.md
+          echo "### 分支: ${{ github.ref }}" >> build_summary.md
+          echo "### 版本号: ${{ steps.version.outputs.full_version }}" >> build_summary.md
+          echo "### 时间戳: ${{ steps.timestamp.outputs.timestamp }}" >> build_summary.md
+          echo "### 下载地址: $DOWNLOAD_URL" >> build_summary.md
+          echo "### 构建时间: $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> build_summary.md
 
-          # Get commit message
+          # 获取提交信息
           COMMIT_MESSAGE=$(git log -1 --pretty=%B)
-          echo "### Commit Message:" >> build_summary.md
+          echo "### 提交信息:" >> build_summary.md
           echo "\`\`\`" >> build_summary.md
           echo "$COMMIT_MESSAGE" >> build_summary.md
           echo "\`\`\`" >> build_summary.md
 
-          # Get changed files
+          # 获取变更文件列表
           CHANGED_FILES=$(git diff --name-only HEAD~1)
-          echo "### Changed Files:" >> build_summary.md
+          echo "### 变更文件:" >> build_summary.md
           echo "\`\`\`" >> build_summary.md
           echo "$CHANGED_FILES" >> build_summary.md
           echo "\`\`\`" >> build_summary.md
 
-      - name: Upload Build Summary
+      # 第十一步：上传构建摘要
+      - name: 上传构建摘要
         uses: actions/upload-artifact@v4.3.3
         with:
           name: build_summary.md
