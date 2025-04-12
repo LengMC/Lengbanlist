@@ -1,7 +1,11 @@
-# Lengbanlist Plugin
+<div align="center">
+<p>
+    <img width="200" src="/Photos/Lengbanlist-icon.png">
+</p>
 
 - *[简体中文](README.md) | English*
 - **[Multi-platform linking](readme-website.md)**
+</div>
 
 ![Lengbanlist](https://github.com/LengMC/Lengbanlist/blob/main/Photos/Lengbanlist.png)
 ![Lengbanlist](https://bstats.org/signatures/bukkit/Lengbanlist.svg)
