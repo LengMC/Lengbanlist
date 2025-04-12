@@ -1,8 +1,11 @@
-# Lengbanlist 插件
+<div align="center">
+<p>
+    <img width="200" src="/pictures/logo.png">
+</p>
 
 - *简体中文 | [English](README_en.md)*
 - **[多平台链接](readme-website.md)**
-
+</div>
 ![Lengbanlist](https://github.com/LengMC/Lengbanlist/blob/main/Photos/Lengbanlist.png)
 ![Lengbanlist](https://bstats.org/signatures/bukkit/Lengbanlist.svg)
 
