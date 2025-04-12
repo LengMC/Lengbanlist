@@ -4,7 +4,8 @@
 </p>
 
 *[简体中文](README.md) | English* |
-**[Multi-platform linking](readme-website.md)**
+**[Multi-platform linking](readme-website.md)** |
+*[Read beforehand](Notice.md)*
 </div>
 
 ![Lengbanlist](https://github.com/LengMC/Lengbanlist/blob/main/Photos/Lengbanlist.png)
