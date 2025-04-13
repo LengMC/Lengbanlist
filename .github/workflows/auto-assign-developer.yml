@@ -1,9 +1,7 @@
 name: Auto Assign Developer and Add Label
 
 on:
-  issues:
-    types:
-      - opened
+  workflow_call:
 
 jobs:
   assign-developer:
@@ -13,21 +11,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # 获取issue编号
           ISSUE_NUMBER=${{ github.event.issue.number }}
-          # 获取issue标题
-          ISSUE_TITLE=${{ github.event.issue.title }}
-          # 获取issue内容
-          ISSUE_BODY=${{ github.event.issue.body }}
-          # 构造评论内容
           COMMENT="@xiaoshaziYA 已收到您的问题，我们会尽快处理。"
-          # 添加评论
           curl -s -H "Authorization: token $GITHUB_TOKEN" \
                -H "Accept: application/vnd.github.v3+json" \
                -X POST \
                -d "{\"body\":\"$COMMENT\"}" \
                "https://api.github.com/repos/${{ github.repository }}/issues/${ISSUE_NUMBER}/comments"
-          # 添加标签
           curl -s -H "Authorization: token $GITHUB_TOKEN" \
                -H "Accept: application/vnd.github.v3+json" \
                -X POST \
