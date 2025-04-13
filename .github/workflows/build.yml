@@ -136,13 +136,13 @@ jobs:
           # 获取提交信息
           COMMIT_MESSAGE=$(git log -1 --pretty=%B)
           echo "### 提交信息:" >> build_summary.md
-          echo "\`\`\`" >> build_summary.md
+          echo "```" >> build_summary.md
           echo "$COMMIT_MESSAGE" >> build_summary.md
-          echo "\`\`\`" >> build_summary.md
+          echo "```" >> build_summary.md
 
           # 改进的变更文件获取逻辑
           echo "### 变更文件:" >> build_summary.md
-          echo "\`\`\`" >> build_summary.md
+          echo "```" >> build_summary.md
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             # 对于PR，比较基础分支和当前分支
             git diff --name-only ${{ github.event.pull_request.base.sha }}..${{ github.sha }} || echo "无法获取PR变更文件"
@@ -155,7 +155,7 @@ jobs:
               git ls-files
             fi
           fi
-          echo "\`\`\`" >> build_summary.md
+          echo "```" >> build_summary.md
 
       # 第十步：上传构建摘要
       - name: 上传构建摘要
@@ -163,3 +163,18 @@ jobs:
         with:
           name: build_summary.md
           path: build_summary.md
+
+  # 调用 auto-assign-developer.yml
+  auto-assign-developer:
+    needs: build-and-upload
+    uses: ./.github/workflows/auto-assign-developer.yml
+
+  # 调用 close-inactive.yml
+  close-inactive:
+    needs: build-and-upload
+    uses: ./.github/workflows/close-inactive.yml
+
+  # 调用 PR_Handler.yml
+  pr-handler:
+    needs: build-and-upload
+    uses: ./.github/workflows/PR_Handler.yml
