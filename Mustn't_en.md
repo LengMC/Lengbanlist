@@ -22,4 +22,4 @@
 
 Violation of these terms will result in automatic termination of usage rights. Users shall bear all legal consequences resulting from such violations.
 
-Last updated: October 15, 2023
+Last updated: April 13, 2025
