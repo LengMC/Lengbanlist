@@ -15,3 +15,4 @@
 1. **克隆仓库**：
    ```bash
    git clone https://github.com/LengMC/Lengbanlist.git
+   cd Lengbanlist
