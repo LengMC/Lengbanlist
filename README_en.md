@@ -6,7 +6,8 @@
 *[简体中文](README.md) | English* |
 **[Multi-platform linking](readme-website.md)** |
 *[Read beforehand](Notice.md)* |
-**[Development Notes](PullRequest_en.md)**
+**[Development Notes](PullRequest_en.md)** |
+*[License Tips](Mustn't_en.md)*
 </div>
 
 ![Lengbanlist](https://github.com/LengMC/Lengbanlist/blob/main/Photos/Lengbanlist.png)
