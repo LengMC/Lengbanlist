@@ -6,7 +6,7 @@
  *简体中文 | [English](README_en.md)* |
  **[多平台链接](readme-website.md)** |
  *[事先阅读](Notice.md)* |
- **[如何成为贡献者](PullRequest_zh.md)**
+ **[开发须知](PullRequest_zh.md)**
 </div>
 
 ![Lengbanlist](https://github.com/LengMC/Lengbanlist/blob/main/Photos/Lengbanlist.png)
