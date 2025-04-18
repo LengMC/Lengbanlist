@@ -91,21 +91,23 @@ public class LengbanlistCommand extends Command implements CommandExecutor, List
                 showBanList(sender);
                 break;
             case "reload":
-                if (!sender.hasPermission("lengbanlist.reload")) {
-                    Utils.sendMessage(sender, plugin.prefix() + "§c不是你的工作喵！");
-                    return true;
-                }
-                plugin.reloadConfig();
-                ModelManager.getInstance().reloadModel();
-                plugin.getLanguageManager().reloadLanguage();
+    if (!sender.hasPermission("lengbanlist.reload")) {
+        Utils.sendMessage(sender, plugin.prefix() + "§c不是你的工作喵！");
+        return true;
+    }
+    plugin.reloadConfig();
+    ModelManager.getInstance().reloadModel();
+    plugin.getLanguageManager().reloadLanguage();
 
-                File broadcastFile = new File(plugin.getDataFolder(), "broadcast.yml");
-                plugin.getServer().broadcastMessage(
-                        plugin.getConfig().getString("default-message")
-                                .replace("%s", String.valueOf(plugin.getBanManager().getBanList().size()))
-                );
-                Utils.sendMessage(sender, currentModel.reloadConfig());
-                break;
+    File broadcastFile = new File(plugin.getDataFolder(), "broadcast.yml");
+    String reloadDefaultMessage = plugin.getConfig().getString("default-message");
+    if (reloadDefaultMessage != null) {
+        plugin.getServer().broadcastMessage(
+            reloadDefaultMessage.replace("%s", String.valueOf(plugin.getBanManager().getBanList().size()))
+        );
+    }
+    Utils.sendMessage(sender, currentModel.reloadConfig());
+    break;
             case "add":
                 if (!sender.hasPermission("lengbanlist.ban")) {
                     Utils.sendMessage(sender, plugin.prefix() + "§c不是你的工作喵！");
