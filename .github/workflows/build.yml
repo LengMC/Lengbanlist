@@ -67,7 +67,7 @@ jobs:
           LOGINS=$(git log --pretty=format:'%H' -n 10 | xargs -I {} curl -sH "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             "https://api.github.com/repos/${{ github.repository }}/commits/{}" | \
             jq -r 'select(.author != null) | .author.login // .committer.login // .commit.author.name' | \
-            grep -v "github-actions" | sort | uniq | head -n 3 | tr '\n' ' ' | sed 's/ $//')
+            grep -v "github-actions" | sort | uniq | head -n 3 | tr '\n' ',' | sed 's/,$//')
           echo "recent_contributors=$LOGINS" >> $GITHUB_OUTPUT
 
       - name: 创建制品目录
@@ -121,14 +121,13 @@ jobs:
 
       - name: 生成构建摘要
         run: |
-          # 获取北京时间（UTC+8）
-          BUILD_TIME=$(date -u -d "+8 hours" +"%Y-%m-%dT%H:%M:%SZ")
           echo "## 构建摘要" > build_summary.md
           echo "### 版本号: ${{ steps.version.outputs.full_version }}" >> build_summary.md
           echo "### 下载地址: $DOWNLOAD_URL" >> build_summary.md
           echo "### 提交者: @${{ steps.get-committer.outputs.committer_login }}" >> build_summary.md
-          echo "### 最近贡献者: ${{ steps.contributors.outputs.recent_contributors }}" >> build_summary.md
-          echo "### 构建时间: $BUILD_TIME" >> build_summary.md
+          if [ -n "${{ steps.contributors.outputs.recent_contributors }}" ]; then
+            echo "### 最近贡献者: ${{ steps.contributors.outputs.recent_contributors }}" >> build_summary.md
+          fi
           git log -3 --pretty=format:"- %h %s (%an)" >> build_summary.md
 
       - name: 上传构建摘要
@@ -160,7 +159,7 @@ jobs:
             构建于 $(date -u -d "+8 hours" +"%Y-%m-%dT%H:%M:%SZ")
             
             提交者: @${{ needs.build-and-upload.outputs.committer_login }}
-            最近贡献者: ${{ needs.build-and-upload.outputs.recent_contributors }}
+            ${{ if steps.contributors.outputs.recent_contributors }}最近贡献者: ${{ needs.build-and-upload.outputs.recent_contributors }}
             
             变更日志:
             ${{ github.event.head_commit.message }}
