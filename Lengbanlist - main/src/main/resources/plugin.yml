@@ -1,6 +1,6 @@
 name: Lengbanlist
 main: org.leng.Lengbanlist
-version: 1.7.0
+version: 1.7.1
 api-version: 1.21
 commands:
   lban:

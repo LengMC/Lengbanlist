@@ -32,10 +32,24 @@ public class WarnCommand extends Command implements CommandExecutor {
         }
 
         if (args.length < 2) {
-            Utils.sendMessage(sender, plugin.prefix() + "§c用法错误: /lban warn <玩家名> <原因>");
+            Utils.sendMessage(sender, plugin.prefix() + "§c用法错误: /lban warn <玩家名/IP> <原因>");
             return false;
         }
 
+        // 检查是否是 IP
+        if (args[0].contains(".")) {
+            if (!plugin.getBanManager().isValidIp(args[0])) {
+                Utils.sendMessage(sender, plugin.prefix() + "§c无效的IP地址");
+                return false;
+            }
+            // IP警告逻辑
+            plugin.getWarnManager().warnIp(args[0], sender.getName(), 
+                String.join(" ", Arrays.copyOfRange(args, 1, args.length)));
+            Utils.sendMessage(sender, plugin.prefix() + "§a已警告IP: " + args[0]);
+            return true;
+        }
+
+        // 玩家警告逻辑
         String target = args[0];
         String reason = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
 

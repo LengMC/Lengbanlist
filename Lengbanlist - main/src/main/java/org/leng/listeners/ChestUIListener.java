@@ -219,7 +219,7 @@ public class ChestUIListener implements Listener {
             String time = player.getMetadata("lengbanlist-time").get(0).asString();
             long duration = TimeUtils.parseTime(time);
             if (playerID.contains(".")) {
-                plugin.getBanManager().banIp(new BanIpEntry(playerID, player.getName(), duration, input));
+                plugin.getBanManager().banIp(new BanIpEntry(playerID, player.getName(), duration, input, false));
                 Utils.sendMessage(player, "§a封禁IP成功：" + playerID);
             } else {
                 plugin.getBanManager().banPlayer(new BanEntry(playerID, player.getName(), duration, input, false));
@@ -274,7 +274,7 @@ public class ChestUIListener implements Listener {
             String ip = player.getMetadata("lengbanlist-ip").get(0).asString();
             String time = player.getMetadata("lengbanlist-time").get(0).asString();
             long duration = TimeUtils.parseTime(time);
-            plugin.getBanManager().banIp(new BanIpEntry(ip, player.getName(), duration, input));
+            plugin.getBanManager().banIp(new BanIpEntry(ip, player.getName(), duration, input, false));
             Utils.sendMessage(player, "§a封禁IP成功：" + ip);
             clearMetadata(player);
         }

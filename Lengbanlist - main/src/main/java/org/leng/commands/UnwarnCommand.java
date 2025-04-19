@@ -32,23 +32,36 @@ public class UnwarnCommand extends Command implements CommandExecutor {
 
         // 检查参数长度
         if (args.length < 1) {
-            Utils.sendMessage(sender, plugin.prefix() + "§c用法错误: /lban unwarn <玩家名> [警告ID]");
+            Utils.sendMessage(sender, plugin.prefix() + "§c用法错误: /lban unwarn <玩家名/IP> [警告ID]");
             return false;
         }
 
         String target = args[0];
         WarnManager warnManager = plugin.getWarnManager();
 
-        // 检查玩家是否有警告记录
-        if (warnManager.getActiveWarnings(target).isEmpty()) {
-            Utils.sendMessage(sender, plugin.prefix() + "§c玩家 " + target + " 没有警告记录。");
-            return false;
+        // 检查是否是 IP
+        boolean isIp = target.contains(".");
+
+        // 检查目标是否有警告记录
+        List<WarnEntry> activeWarnings;
+        if (isIp) {
+            activeWarnings = warnManager.getActiveWarnings(target);
+            if (activeWarnings.isEmpty()) {
+                Utils.sendMessage(sender, plugin.prefix() + "§cIP " + target + " 没有警告记录。");
+                return false;
+            }
+        } else {
+            activeWarnings = warnManager.getActiveWarnings(target);
+            if (activeWarnings.isEmpty()) {
+                Utils.sendMessage(sender, plugin.prefix() + "§c玩家 " + target + " 没有警告记录。");
+                return false;
+            }
         }
 
         try {
             // 如果有警告ID，移除特定警告
             if (args.length > 1) {
-                int warnId = parseWarnId(args[1], warnManager.getActiveWarnings(target));
+                int warnId = parseWarnId(args[1], activeWarnings);
                 if (warnId != -1 && warnManager.unwarnPlayer(target, warnId)) {
                     Utils.sendMessage(sender, plugin.prefix() + "§a警告 #" + warnId + " 已移除");
                 } else {
@@ -56,11 +69,14 @@ public class UnwarnCommand extends Command implements CommandExecutor {
                 }
             } else {
                 // 移除所有警告
-                List<WarnEntry> warnings = warnManager.getActiveWarnings(target);
-                for (int i = 0; i < warnings.size(); i++) {
+                for (int i = 0; i < activeWarnings.size(); i++) {
                     warnManager.unwarnPlayer(target, i + 1); // 警告ID从1开始
                 }
-                Utils.sendMessage(sender, plugin.prefix() + "§a已移除玩家 " + target + " 的所有警告");
+                if (isIp) {
+                    Utils.sendMessage(sender, plugin.prefix() + "§a已移除IP " + target + " 的所有警告");
+                } else {
+                    Utils.sendMessage(sender, plugin.prefix() + "§a已移除玩家 " + target + " 的所有警告");
+                }
             }
         } catch (Exception e) {
             Utils.sendMessage(sender, plugin.prefix() + "§c处理警告时出错: " + e.getMessage());

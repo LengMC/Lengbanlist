@@ -100,7 +100,7 @@ public class AnvilGUIListener implements Listener {
 
             if (playerID.contains(".")) {
                 // 封禁 IP
-                plugin.getBanManager().banIp(new BanIpEntry(playerID, player.getName(), banTimestamp, input));
+                plugin.getBanManager().banIp(new BanIpEntry(playerID, player.getName(), banTimestamp, input, false));
                 Utils.sendMessage(player, "§a成功封禁IP：" + playerID + "，时长：" + time + "，原因：" + input);
             } else {
                 // 封禁玩家
@@ -195,7 +195,7 @@ public class AnvilGUIListener implements Listener {
             String time = player.getMetadata("lengbanlist-time").get(0).asString();
             long banTimestamp = TimeUtils.parseTime(time);
 
-            plugin.getBanManager().banIp(new BanIpEntry(ip, player.getName(), banTimestamp, input));
+            plugin.getBanManager().banIp(new BanIpEntry(ip, player.getName(), banTimestamp, input, false));
             Utils.sendMessage(player, "§a成功封禁IP：" + ip + "，时长：" + time + "，原因：" + input);
 
             player.removeMetadata("lengbanlist-action", plugin);

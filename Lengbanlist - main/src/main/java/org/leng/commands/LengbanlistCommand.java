@@ -125,7 +125,7 @@ public class LengbanlistCommand extends Command implements CommandExecutor, List
                     int duration = (int) durationLong;
 
                     if (args[1].contains(".")) {
-                        plugin.getBanManager().banIp(new BanIpEntry(args[1], sender.getName(), duration, args[3]));
+                        plugin.getBanManager().banIp(new BanIpEntry(args[1], sender.getName(), duration, args[3], false));
                         Utils.sendMessage(sender, currentModel.addBanIp(args[1], duration, args[3]));
                     } else {
                         plugin.getBanManager().banPlayer(new BanEntry(args[1], sender.getName(), duration, args[3], false));

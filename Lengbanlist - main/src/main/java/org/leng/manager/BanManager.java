@@ -157,7 +157,7 @@ public class BanManager {
                 String staff = parts[1];
                 long time = Long.parseLong(parts[2]);
                 String reason = parts[3];
-                banIpList.add(new BanIpEntry(ip, staff, time, reason));
+                banIpList.add(new BanIpEntry(ip, staff, time, reason, false));
             }
         }
         return banIpList;
@@ -212,9 +212,31 @@ public class BanManager {
                 String staff = parts[1];
                 long time = Long.parseLong(parts[2]);
                 String reason = parts[3];
-                return new BanIpEntry(ip, staff, time, reason);
+                return new BanIpEntry(ip, staff, time, reason,false);
             }
         }
         return null;
+    }
+
+    // 验证 IP 地址是否有效
+    public boolean isValidIp(String ip) {
+        if (ip == null || ip.isEmpty()) {
+            return false;
+        }
+        String[] parts = ip.split("\\.");
+        if (parts.length != 4) {
+            return false;
+        }
+        for (String part : parts) {
+            try {
+                int num = Integer.parseInt(part);
+                if (num < 0 || num > 255) {
+                    return false;
+                }
+            } catch (NumberFormatException e) {
+                return false;
+            }
+        }
+        return true;
     }
 }

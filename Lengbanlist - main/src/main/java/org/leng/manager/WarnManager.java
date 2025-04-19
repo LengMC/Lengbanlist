@@ -14,26 +14,37 @@ public class WarnManager {
     private final List<WarnEntry> warnList = Collections.synchronizedList(new ArrayList<>());
     private final Map<String, Integer> autoBanCounter = new ConcurrentHashMap<>();
 
+    // 警告玩家
     public void warnPlayer(String player, String staff, String reason) {
         WarnEntry entry = new WarnEntry(player, staff, System.currentTimeMillis(), reason);
         warnList.add(entry);
         checkAutoBan(player);
     }
 
-    public List<WarnEntry> getAllWarnings(String playerName) {
+    // 警告 IP
+    public void warnIp(String ip, String staff, String reason) {
+        WarnEntry entry = new WarnEntry(ip, staff, System.currentTimeMillis(), reason);
+        warnList.add(entry);
+        // IP 警告不触发自动封禁
+    }
+
+    // 获取某玩家的所有警告记录
+    public List<WarnEntry> getAllWarnings(String target) {
         return warnList.stream()
-                .filter(e -> e.getPlayer().equalsIgnoreCase(playerName))
+                .filter(e -> e.getPlayer().equalsIgnoreCase(target))
                 .collect(Collectors.toList());
     }
 
-    public List<WarnEntry> getActiveWarnings(String playerName) {
+    // 获取某玩家的有效警告记录（未撤销的）
+    public List<WarnEntry> getActiveWarnings(String target) {
         return warnList.stream()
-                .filter(e -> e.getPlayer().equalsIgnoreCase(playerName) && !e.isRevoked())
+                .filter(e -> e.getPlayer().equalsIgnoreCase(target) && !e.isRevoked())
                 .collect(Collectors.toList());
     }
 
-    public boolean unwarnPlayer(String playerName, int warnId) {
-        List<WarnEntry> playerWarnings = getAllWarnings(playerName);
+    // 撤销某玩家的某次警告
+    public boolean unwarnPlayer(String target, int warnId) {
+        List<WarnEntry> playerWarnings = getAllWarnings(target);
         if (warnId > 0 && warnId <= playerWarnings.size()) {
             WarnEntry entry = playerWarnings.get(warnId - 1);
             if (!entry.isRevoked()) {
@@ -44,10 +55,11 @@ public class WarnManager {
         return false;
     }
 
+    // 检查是否需要自动封禁
     private void checkAutoBan(String player) {
         long now = System.currentTimeMillis();
         long timeWindow = 30L * 24 * 60 * 60 * 1000; // 30天时间窗口
-        
+
         List<WarnEntry> validWarnings = warnList.stream()
                 .filter(e -> e.getPlayer().equalsIgnoreCase(player))
                 .filter(e -> !e.isRevoked())
@@ -57,28 +69,29 @@ public class WarnManager {
         if (validWarnings.size() >= 3) {
             int triggerCount = autoBanCounter.getOrDefault(player, 0) + 1;
             autoBanCounter.put(player, triggerCount);
-            
+
             long banDuration = calculateBanDuration(triggerCount);
             String formattedDuration = TimeUtils.formatDuration(banDuration);
-            
+
             BanEntry banEntry = new BanEntry(
                     player,
-                    "System",
+                    "LBAC",
                     now + banDuration,
-                    String.format("自动封禁（%d次警告，第%d次触发） <Lengbanlist-auto>", 
+                    String.format("自动封禁（%d次警告，第%d次触发） <LBAC>", 
                             validWarnings.size(), triggerCount),
                     true
             );
-            
+
             Lengbanlist.getInstance().getBanManager().banPlayer(banEntry);
-            
+
             String message = String.format(
-                    "§6[Lengbanlist-AutoBan] §e%s §c因30天内累计%d次警告被自动封禁§a%s §6<auto>",
+                    "§6[LBAC] §e%s §c因30天内累计%d次警告被自动封禁§a%s §6<此封禁由系统决定>",
                     player, validWarnings.size(), formattedDuration);
             Lengbanlist.getInstance().getServer().broadcastMessage(message);
         }
     }
 
+    // 计算封禁时长
     public long calculateBanDuration(int triggerCount) {
         switch (triggerCount) {
             case 1: return TimeUtils.daysToMillis(1);
@@ -90,6 +103,7 @@ public class WarnManager {
         }
     }
 
+    // 从配置文件加载警告记录
     public void loadFromConfig(FileConfiguration config) {
         warnList.clear();
         for (String entry : config.getStringList("warnings")) {
@@ -104,6 +118,7 @@ public class WarnManager {
         }
     }
 
+    // 保存警告记录到配置文件
     public void saveToConfig(FileConfiguration config) {
         List<String> warnings = new ArrayList<>();
         for (WarnEntry entry : warnList) {
