@@ -148,20 +148,24 @@ jobs:
         with:
           name: Lengbanlist-${{ needs.build-and-upload.outputs.base_version }}.jar
           path: ${{ github.workspace }}/release-artifacts
+      - name: 生成 Release Body
+        run: |
+          echo "版本 ${{ needs.build-and-upload.outputs.full_version }}" > release_body.md
+          echo "构建于 $(date -u -d "+8 hours" +"%Y-%m-%dT%H:%M:%SZ")" >> release_body.md
+          echo "" >> release_body.md
+          echo "提交者: @${{ needs.build-and-upload.outputs.committer_login }}" >> release_body.md
+          if [ -n "${{ needs.build-and-upload.outputs.recent_contributors }}" ]; then
+            echo "最近贡献者: ${{ needs.build-and-upload.outputs.recent_contributors }}" >> release_body.md
+          fi
+          echo "" >> release_body.md
+          echo "变更日志:" >> release_body.md
+          echo "${{ github.event.head_commit.message }}" >> release_body.md
       - name: 创建Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ needs.build-and-upload.outputs.base_version }}
           release_name: ${{ needs.build-and-upload.outputs.base_version }} Latest
-          body: |
-            版本 ${{ needs.build-and-upload.outputs.full_version }}
-            构建于 $(date -u -d "+8 hours" +"%Y-%m-%dT%H:%M:%SZ")
-            
-            提交者: @${{ needs.build-and-upload.outputs.committer_login }}
-            ${{ if needs.build-and-upload.outputs.recent_contributors }}最近贡献者: ${{ needs.build-and-upload.outputs.recent_contributors }}
-            
-            变更日志:
-            ${{ github.event.head_commit.message }}
+          body: ${{ steps.generate-release-body.outputs.body }}
           files: ${{ github.workspace }}/release-artifacts/Lengbanlist-${{ needs.build-and-upload.outputs.base_version }}.jar
           draft: false
           prerelease: false
