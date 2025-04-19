@@ -63,10 +63,11 @@ jobs:
       - name: 获取最近贡献者GitHub用户名
         id: contributors
         run: |
+          # 获取最近10个提交的贡献者GitHub用户名
           LOGINS=$(git log --pretty=format:'%H' -n 10 | xargs -I {} curl -sH "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             "https://api.github.com/repos/${{ github.repository }}/commits/{}" | \
             jq -r 'select(.author != null) | .author.login // .committer.login // .commit.author.name' | \
-            grep -v "github-actions" | sort | uniq | head -n 3 | tr '\n' ',' | sed 's/,$//')
+            grep -v "github-actions" | sort | uniq | head -n 3 | tr '\n' ' ' | sed 's/ $//')
           echo "recent_contributors=$LOGINS" >> $GITHUB_OUTPUT
 
       - name: 创建制品目录
@@ -113,7 +114,6 @@ jobs:
             --data-urlencode "commit=${{ github.sha }}" \
             --data-urlencode "branch=${{ github.ref }}" \
             --data-urlencode "version=${{ steps.version.outputs.full_version }}" \
-            --data-urlencode "date=$(date -u -d "+8 hours" +"%Y-%m-%dT%H:%M:%SZ")" \
             --data-urlencode "link=$DOWNLOAD_URL" \
             --data-urlencode "release=false" \
             "https://service.fpsmaster.top/pushVersion"
@@ -124,9 +124,7 @@ jobs:
           echo "### 版本号: ${{ steps.version.outputs.full_version }}" >> build_summary.md
           echo "### 下载地址: $DOWNLOAD_URL" >> build_summary.md
           echo "### 提交者: @${{ steps.get-committer.outputs.committer_login }}" >> build_summary.md
-          if [ -n "${{ steps.contributors.outputs.recent_contributors }}" ]; then
-            echo "### 最近贡献者: ${{ steps.contributors.outputs.recent_contributors }}" >> build_summary.md
-          fi
+          echo "### 最近贡献者: ${{ steps.contributors.outputs.recent_contributors }}" >> build_summary.md
           git log -3 --pretty=format:"- %h %s (%an)" >> build_summary.md
 
       - name: 上传构建摘要
@@ -148,24 +146,19 @@ jobs:
         with:
           name: Lengbanlist-${{ needs.build-and-upload.outputs.base_version }}.jar
           path: ${{ github.workspace }}/release-artifacts
-      - name: 生成 Release Body
-        run: |
-          echo "版本 ${{ needs.build-and-upload.outputs.full_version }}" > release_body.md
-          echo "构建于 $(date -u -d "+8 hours" +"%Y-%m-%dT%H:%M:%SZ")" >> release_body.md
-          echo "" >> release_body.md
-          echo "提交者: @${{ needs.build-and-upload.outputs.committer_login }}" >> release_body.md
-          if [ -n "${{ needs.build-and-upload.outputs.recent_contributors }}" ]; then
-            echo "最近贡献者: ${{ needs.build-and-upload.outputs.recent_contributors }}" >> release_body.md
-          fi
-          echo "" >> release_body.md
-          echo "变更日志:" >> release_body.md
-          echo "${{ github.event.head_commit.message }}" >> release_body.md
       - name: 创建Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ needs.build-and-upload.outputs.base_version }}
           release_name: ${{ needs.build-and-upload.outputs.base_version }} Latest
-          body: ${{ steps.generate-release-body.outputs.body }}
+          body: |
+            版本 ${{ needs.build-and-upload.outputs.full_version }}
+            
+            提交者: @${{ needs.build-and-upload.outputs.committer_login }}
+            最近贡献者: ${{ needs.build-and-upload.outputs.recent_contributors }}
+            
+            变更日志:
+            ${{ github.event.head_commit.message }}
           files: ${{ github.workspace }}/release-artifacts/Lengbanlist-${{ needs.build-and-upload.outputs.base_version }}.jar
           draft: false
           prerelease: false
