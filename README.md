@@ -3,14 +3,14 @@
     <img width="200" src="/Photos/Lengbanlist-icon.png">
 </p>
 
- *简体中文 | [English](README_en.md)* |
+ *简体中文 | [English](README_en.md)* 
+
  **[多平台链接](readme-website.md)** |
  *[事先阅读](Notice.md)* |
  **[开发须知](PullRequest_zh.md)** |
  *[许可证提示](Mustn't_zh.md)* |
+ **[Discord](https://discord.gg/aeWjf7vD)**
 </div>
-
-**[Discord](https://discord.gg/aeWjf7vD)**
 
 ![Lengbanlist](https://github.com/LengMC/Lengbanlist/blob/main/Photos/Lengbanlist.png)
 ![Lengbanlist](https://bstats.org/signatures/bukkit/Lengbanlist.svg)
