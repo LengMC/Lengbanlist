@@ -185,11 +185,14 @@ jobs:
   close-inactive:
     needs: build-and-upload
     permissions:
+      contents: read
       issues: write
+      pull-requests: write
     uses: ./.github/workflows/close-inactive.yml
 
   pr-handler:
     needs: build-and-upload
     permissions:
+      contents: read
       pull-requests: write
     uses: ./.github/workflows/PR_Handler.yml
