@@ -1,7 +1,8 @@
 name: Auto Assign Developer and Add Label
 
 on:
-  workflow_call:
+  issues:
+    types: [opened]
 
 jobs:
   assign-developer:
