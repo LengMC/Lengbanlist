@@ -114,7 +114,7 @@ jobs:
             --data-urlencode "commit=${{ github.sha }}" \
             --data-urlencode "branch=${{ github.ref }}" \
             --data-urlencode "version=${{ steps.version.outputs.full_version }}" \
-            --data-urlencode "date=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            --data-urlencode "date=$(date -u -d "+8 hours" +"%Y-%m-%dT%H:%M:%SZ")" \
             --data-urlencode "link=$DOWNLOAD_URL" \
             --data-urlencode "release=false" \
             "https://service.fpsmaster.top/pushVersion"
@@ -126,6 +126,9 @@ jobs:
           echo "### 下载地址: $DOWNLOAD_URL" >> build_summary.md
           echo "### 提交者: @${{ steps.get-committer.outputs.committer_login }}" >> build_summary.md
           echo "### 最近贡献者: ${{ steps.contributors.outputs.recent_contributors }}" >> build_summary.md
+          # 获取北京时间（UTC+8）
+          BUILD_TIME=$(date -u -d "+8 hours" +"%Y-%m-%dT%H:%M:%SZ")
+          echo "### 构建时间: $BUILD_TIME" >> build_summary.md
           git log -3 --pretty=format:"- %h %s (%an)" >> build_summary.md
 
       - name: 上传构建摘要
@@ -153,13 +156,13 @@ jobs:
           tag_name: ${{ needs.build-and-upload.outputs.base_version }}
           release_name: ${{ needs.build-and-upload.outputs.base_version }} Latest
           body: |
-            版本 ${{ needs.build-and-upload.outputs.full_version }}
-            构建于 $(date -u +"%Y-%m-%dT%H:%M:%SZ")
-            
+            √版本 ${{ needs.build-and-upload.outputs.full_version }}
+            构建于 $(date -u -d "+8 hours" +"%Y-%m-%dT%H:%M:%SZ")
+            ---
             提交者: @${{ needs.build-and-upload.outputs.committer_login }}
-            最近贡献者: ${{ needs.build-and-upload.outputs.recent_contributors }}
-            
-            变更日志:
+            感谢最近贡献者: ${{ needs.build-and-upload.outputs.recent_contributors }}
+            ---
+            更新日志:
             ${{ github.event.head_commit.message }}
           files: ${{ github.workspace }}/release-artifacts/Lengbanlist-${{ needs.build-and-upload.outputs.base_version }}.jar
           draft: false
