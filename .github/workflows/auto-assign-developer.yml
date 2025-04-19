@@ -6,6 +6,8 @@ on:
 jobs:
   assign-developer:
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
     steps:
       - name: Assign Developer and Add Label
         env:
