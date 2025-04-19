@@ -7,7 +7,7 @@ on:
     branches: [ "main" ]
 
 permissions:
-  contents: read  # 调整为 read 权限
+  contents: read  # 确保父工作流有读取权限
   issues: write
   pull-requests: write
   actions: read
@@ -16,7 +16,7 @@ jobs:
   build-and-upload:
     runs-on: ubuntu-latest
     permissions:
-      contents: read  # 保持与父工作流一致
+      contents: read  # 确保作业有读取权限
     outputs:
       version: ${{ steps.version.outputs.full_version }}
       base_version: ${{ steps.version.outputs.base_version }}
@@ -146,6 +146,7 @@ jobs:
     permissions:
       issues: write
       pull-requests: write
+      contents: read  # 确保子工作流有读取权限
     uses: ./.github/workflows/close-inactive.yml
 
   pr-handler:
