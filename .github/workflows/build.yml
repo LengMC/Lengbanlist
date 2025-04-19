@@ -63,7 +63,6 @@ jobs:
       - name: 获取最近贡献者GitHub用户名
         id: contributors
         run: |
-          # 获取最近10个提交的贡献者GitHub用户名
           LOGINS=$(git log --pretty=format:'%H' -n 10 | xargs -I {} curl -sH "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             "https://api.github.com/repos/${{ github.repository }}/commits/{}" | \
             jq -r 'select(.author != null) | .author.login // .committer.login // .commit.author.name' | \
@@ -159,7 +158,7 @@ jobs:
             构建于 $(date -u -d "+8 hours" +"%Y-%m-%dT%H:%M:%SZ")
             
             提交者: @${{ needs.build-and-upload.outputs.committer_login }}
-            ${{ if steps.contributors.outputs.recent_contributors }}最近贡献者: ${{ needs.build-and-upload.outputs.recent_contributors }}
+            ${{ if needs.build-and-upload.outputs.recent_contributors }}最近贡献者: ${{ needs.build-and-upload.outputs.recent_contributors }}
             
             变更日志:
             ${{ github.event.head_commit.message }}
