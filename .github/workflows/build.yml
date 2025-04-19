@@ -21,6 +21,8 @@ jobs:
       version: ${{ steps.version.outputs.full_version }}
       base_version: ${{ steps.version.outputs.base_version }}
       jar_path: ${{ steps.copy-jar.outputs.jar_path }}
+      committer: ${{ steps.get-committer.outputs.committer }}
+      recent_contributors: ${{ steps.contributors.outputs.recent_contributors }}
 
     steps:
       - name: 检出仓库
@@ -49,10 +51,16 @@ jobs:
           echo "full_version=$FULL_VERSION" >> $GITHUB_OUTPUT
           echo "base_version=$BASE_VERSION" >> $GITHUB_OUTPUT
 
+      - name: 获取提交者信息
+        id: get-committer
+        run: |
+          COMMITTER=$(git log -1 --pretty=format:'%an')
+          echo "committer=$COMMITTER" >> $GITHUB_OUTPUT
+
       - name: 获取最近贡献者
         id: contributors
         run: |
-          echo "recent_contributors=$(git log --pretty=format:'%an' -n 10 | sort | uniq | grep -v 'github-actions' | head -n 3 | tr '\n' ',' | sed 's/,$//')" >> $GITHUB_OUTPUT
+          echo "recent_contributors=$(git log --pretty=format:'@%an' -n 10 | sort | uniq | grep -v '@github-actions' | head -n 3 | tr '\n' ' ' | sed 's/ $//')" >> $GITHUB_OUTPUT
 
       - name: 创建制品目录
         run: |
@@ -67,14 +75,14 @@ jobs:
             echo "错误: 未找到JAR文件"
             exit 1
           fi
-          cp "$JAR_FILE" "${{ github.workspace }}/artifacts/Lengbanlist.jar"
-          echo "jar_path=${{ github.workspace }}/artifacts/Lengbanlist.jar" >> $GITHUB_OUTPUT
+          cp "$JAR_FILE" "${{ github.workspace }}/artifacts/Lengbanlist-${{ steps.version.outputs.base_version }}.jar"
+          echo "jar_path=${{ github.workspace }}/artifacts/Lengbanlist-${{ steps.version.outputs.base_version }}.jar" >> $GITHUB_OUTPUT
 
       - name: 上传制品到GitHub
         uses: actions/upload-artifact@v4
         with:
-          name: Lengbanlist.jar
-          path: "${{ github.workspace }}/artifacts/Lengbanlist.jar"
+          name: Lengbanlist-${{ steps.version.outputs.base_version }}.jar
+          path: "${{ github.workspace }}/artifacts/Lengbanlist-${{ steps.version.outputs.base_version }}.jar"
 
       - name: 上传到KStore
         run: |
@@ -84,10 +92,10 @@ jobs:
             --header "User-Agent: Apifox/1.0.0 (https://apifox.com)" \
             --form "access_token=${{ secrets.OSS }}" \
             --form "fileId=0" \
-            --form "name=Lengbanlist.jar")
+            --form "name=Lengbanlist-${{ steps.version.outputs.base_version }}.jar")
           DIR_ID=$(echo "$RESPONSE" | jq -r '.data.id')
           UPLOAD_RESPONSE=$(curl --location --request POST "https://upload.kstore.space/upload/$DIR_ID?access_token=${{ secrets.OSS }}" \
-            -F "file=@Lengbanlist.jar")
+            -F "file=@Lengbanlist-${{ steps.version.outputs.base_version }}.jar")
           DOWNLOAD_URL=$(echo "$UPLOAD_RESPONSE" | jq -r '.data.downloadUrl')
           FILE_ID=$(echo "$UPLOAD_RESPONSE" | jq -r '.data.id')
           curl --location --request POST "https://api.kstore.cc/api/v1/file/direct?access_token=${{ secrets.OSS }}" \
@@ -108,6 +116,7 @@ jobs:
           echo "## 构建摘要" > build_summary.md
           echo "### 版本号: ${{ steps.version.outputs.full_version }}" >> build_summary.md
           echo "### 下载地址: $DOWNLOAD_URL" >> build_summary.md
+          echo "### 提交者: @${{ steps.get-committer.outputs.committer }}" >> build_summary.md
           echo "### 最近贡献者: ${{ steps.contributors.outputs.recent_contributors }}" >> build_summary.md
           git log -3 --pretty=format:"- %h %s (%an)" >> build_summary.md
 
@@ -125,19 +134,25 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+      - name: 下载构建产物
+        uses: actions/download-artifact@v4
+        with:
+          name: Lengbanlist-${{ needs.build-and-upload.outputs.base_version }}.jar
+          path: ${{ github.workspace }}/release-artifacts
       - name: 创建Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: v${{ needs.build-and-upload.outputs.base_version }}
-          release_name: v${{ needs.build-and-upload.outputs.base_version }}
+          tag_name: ${{ needs.build-and-upload.outputs.base_version }}
+          release_name: ${{ needs.build-and-upload.outputs.base_version }} Latest
           body: |
             版本 ${{ needs.build-and-upload.outputs.full_version }}
             构建于 $(date -u +"%Y-%m-%dT%H:%M:%SZ")
             
-            感谢最近的贡献者: ${{ needs.build-and-upload.outputs.recent_contributors }}
+            提交者: @${{ needs.build-and-upload.outputs.committer }}
+            最近贡献者: ${{ needs.build-and-upload.outputs.recent_contributors }}
             
             变更日志:
             ${{ github.event.head_commit.message }}
-          files: ${{ needs.build-and-upload.outputs.jar_path }}
+          files: ${{ github.workspace }}/release-artifacts/Lengbanlist-${{ needs.build-and-upload.outputs.base_version }}.jar
           draft: false
           prerelease: false
