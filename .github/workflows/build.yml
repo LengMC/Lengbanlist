@@ -21,7 +21,7 @@ jobs:
       version: ${{ steps.version.outputs.full_version }}
       base_version: ${{ steps.version.outputs.base_version }}
       jar_path: ${{ steps.copy-jar.outputs.jar_path }}
-      committer: ${{ steps.get-committer.outputs.committer }}
+      committer_login: ${{ steps.get-committer.outputs.committer_login }}
       recent_contributors: ${{ steps.contributors.outputs.recent_contributors }}
 
     steps:
@@ -51,16 +51,24 @@ jobs:
           echo "full_version=$FULL_VERSION" >> $GITHUB_OUTPUT
           echo "base_version=$BASE_VERSION" >> $GITHUB_OUTPUT
 
-      - name: 获取提交者信息
+      - name: 获取提交者GitHub用户名
         id: get-committer
         run: |
-          COMMITTER=$(git log -1 --pretty=format:'%an')
-          echo "committer=$COMMITTER" >> $GITHUB_OUTPUT
+          COMMIT_SHA=$(git rev-parse HEAD)
+          COMMITTER_LOGIN=$(curl -sH "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/commits/$COMMIT_SHA" | \
+            jq -r '.author.login // .committer.login // .commit.author.name')
+          echo "committer_login=$COMMITTER_LOGIN" >> $GITHUB_OUTPUT
 
-      - name: 获取最近贡献者
+      - name: 获取最近贡献者GitHub用户名
         id: contributors
         run: |
-          echo "recent_contributors=$(git log --pretty=format:'@%an' -n 10 | sort | uniq | grep -v '@github-actions' | head -n 3 | tr '\n' ' ' | sed 's/ $//')" >> $GITHUB_OUTPUT
+          # 获取最近10个提交的贡献者GitHub用户名
+          LOGINS=$(git log --pretty=format:'%H' -n 10 | xargs -I {} curl -sH "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/commits/{}" | \
+            jq -r 'select(.author != null) | .author.login // .committer.login // .commit.author.name' | \
+            grep -v "github-actions" | sort | uniq | head -n 3 | tr '\n' ' ' | sed 's/ $//')
+          echo "recent_contributors=$LOGINS" >> $GITHUB_OUTPUT
 
       - name: 创建制品目录
         run: |
@@ -116,7 +124,7 @@ jobs:
           echo "## 构建摘要" > build_summary.md
           echo "### 版本号: ${{ steps.version.outputs.full_version }}" >> build_summary.md
           echo "### 下载地址: $DOWNLOAD_URL" >> build_summary.md
-          echo "### 提交者: @${{ steps.get-committer.outputs.committer }}" >> build_summary.md
+          echo "### 提交者: @${{ steps.get-committer.outputs.committer_login }}" >> build_summary.md
           echo "### 最近贡献者: ${{ steps.contributors.outputs.recent_contributors }}" >> build_summary.md
           git log -3 --pretty=format:"- %h %s (%an)" >> build_summary.md
 
@@ -148,7 +156,7 @@ jobs:
             版本 ${{ needs.build-and-upload.outputs.full_version }}
             构建于 $(date -u +"%Y-%m-%dT%H:%M:%SZ")
             
-            提交者: @${{ needs.build-and-upload.outputs.committer }}
+            提交者: @${{ needs.build-and-upload.outputs.committer_login }}
             最近贡献者: ${{ needs.build-and-upload.outputs.recent_contributors }}
             
             变更日志:
