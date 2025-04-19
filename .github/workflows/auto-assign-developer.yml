@@ -15,7 +15,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           ISSUE_NUMBER=${{ github.event.issue.number }}
-          COMMENT="@xiaoshaziYA 已收到您的问题，我们会尽快处理。"
+          COMMENT="@${{ github.actor }} 您好，已收到您的问题，我们会尽快处理。\n@xiaoshaziYA 有新的问题需要确认。"
           curl -s -H "Authorization: token $GITHUB_TOKEN" \
                -H "Accept: application/vnd.github.v3+json" \
                -X POST \
