@@ -1,3 +1,4 @@
+# Notice | 注意！
 ---
 - -->关于本插件【Lengbanlist】，您需要知悉的：
 - 1.本插件在Github上开源：https://github.com/LengMC/Lengbanlist
