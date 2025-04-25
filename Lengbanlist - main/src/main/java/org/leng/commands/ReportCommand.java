@@ -6,14 +6,17 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.leng.Lengbanlist;
-import org.leng.manager.ReportManager;
 import org.leng.object.ReportEntry;
 import org.leng.utils.Utils;
 
-import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ReportCommand implements CommandExecutor {
     private final Lengbanlist plugin;
+    private final Map<String, ReportEntry> reports = new HashMap<>();
+    private int nextReportId = 1;
 
     public ReportCommand(Lengbanlist plugin) {
         this.plugin = plugin;
@@ -26,13 +29,9 @@ public class ReportCommand implements CommandExecutor {
             return true;
         }
         Player player = (Player) sender;
-        if (!player.isOp()) {
-            Utils.sendMessage(sender, plugin.prefix() + "§c只有管理员 (OP) 可以使用此命令。");
-            return true;
-        }
 
         if (args.length < 1) {
-            Utils.sendMessage(sender, plugin.prefix() + "§c用法错误: /report <子命令> <参数>");
+            Utils.sendMessage(sender, plugin.prefix() + "§c用法错误: /report <玩家名> <原因> 或 /report accept/close <举报编号>");
             return true;
         }
 
@@ -52,15 +51,20 @@ public class ReportCommand implements CommandExecutor {
                 handleClose(player, args[1]);
                 break;
             default:
-                Utils.sendMessage(sender, plugin.prefix() + "§c未知的子命令: " + args[0]);
+                if (args.length < 2) {
+                    Utils.sendMessage(sender, plugin.prefix() + "§c用法错误: /report <玩家名> <原因>");
+                    return true;
+                }
+                String target = args[0];
+                String reason = String.join(" ", java.util.Arrays.copyOfRange(args, 1, args.length));
+                handleReportSubmit(player, target, reason);
                 break;
         }
         return true;
     }
 
     private void handleAccept(Player player, String reportId) {
-        ReportManager reportManager = plugin.getReportManager();
-        ReportEntry report = reportManager.getReport(reportId);
+        ReportEntry report = reports.get(reportId);
 
         if (report == null) {
             Utils.sendMessage(player, plugin.prefix() + "§c未找到举报编号: " + reportId);
@@ -69,7 +73,6 @@ public class ReportCommand implements CommandExecutor {
 
         // 设置举报状态为受理
         report.setStatus("受理中");
-        reportManager.saveReports();
 
         // 给举报人发送消息
         Player reporter = Bukkit.getPlayer(report.getReporter());
@@ -82,8 +85,7 @@ public class ReportCommand implements CommandExecutor {
     }
 
     private void handleClose(Player player, String reportId) {
-        ReportManager reportManager = plugin.getReportManager();
-        ReportEntry report = reportManager.getReport(reportId);
+        ReportEntry report = reports.get(reportId);
 
         if (report == null) {
             Utils.sendMessage(player, plugin.prefix() + "§c未找到举报编号: " + reportId);
@@ -91,7 +93,22 @@ public class ReportCommand implements CommandExecutor {
         }
 
         // 移除举报记录
-        reportManager.removeReport(reportId);
+        reports.remove(reportId);
         Utils.sendMessage(player, plugin.prefix() + "§a你已关闭举报: " + report.getId());
     }
+
+private void handleReportSubmit(Player reporter, String target, String reason) {
+    String reportId = String.valueOf(nextReportId++);
+    ReportEntry report = new ReportEntry(
+            target,
+            reporter.getName(),
+            reason,
+            reportId,
+            System.currentTimeMillis(), 
+            "未处理"
+    );
+    reports.put(reportId, report);
+
+    Utils.sendMessage(reporter, plugin.prefix() + "§a举报已提交: " + target + " - " + reason + "，举报编号：" + reportId);
+}
 }
