@@ -13,14 +13,26 @@ public class ReportEntry implements ConfigurationSerializable {
     private String reason;
     private String id;
     private String status;
+    private long timestamp; // 添加时间戳字段
 
     public ReportEntry() {}
 
+    // 保留原有的构造函数
     public ReportEntry(String target, String reporter, String reason, String id) {
         this.target = target;
         this.reporter = reporter;
         this.reason = reason;
         this.id = id;
+    }
+
+    // 新增构造函数，支持时间戳
+    public ReportEntry(String target, String reporter, String reason, String id, long timestamp, String status) {
+        this.target = target;
+        this.reporter = reporter;
+        this.reason = reason;
+        this.id = id;
+        this.timestamp = timestamp;
+        this.status = status;
     }
 
     public String getTarget() {
@@ -47,6 +59,10 @@ public class ReportEntry implements ConfigurationSerializable {
         this.status = status;
     }
 
+    public long getTimestamp() { // 添加获取时间戳的方法
+        return timestamp;
+    }
+
     @Override
     public Map<String, Object> serialize() {
         Map<String, Object> map = new HashMap<>();
@@ -55,15 +71,22 @@ public class ReportEntry implements ConfigurationSerializable {
         map.put("reason", reason);
         map.put("id", id);
         map.put("status", status);
+        map.put("timestamp", timestamp); // 保存时间戳
         return map;
     }
 
     public static ReportEntry deserialize(Map<String, Object> map) {
+        // 从Map中读取时间戳和状态，如果不存在则使用默认值
+        long timestamp = map.containsKey("timestamp") ? (long) map.get("timestamp") : System.currentTimeMillis();
+        String status = map.containsKey("status") ? (String) map.get("status") : "未处理";
+
         return new ReportEntry(
                 (String) map.get("target"),
                 (String) map.get("reporter"),
                 (String) map.get("reason"),
-                (String) map.get("id")
+                (String) map.get("id"),
+                timestamp,
+                status
         );
     }
 }
