@@ -6,9 +6,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.leng.Lengbanlist;
 import org.leng.manager.WarnManager;
-import org.leng.models.Model;
-import org.leng.utils.Utils;
 import org.leng.object.WarnEntry;
+import org.leng.utils.Utils;
 
 import java.util.List;
 import java.util.Arrays;
@@ -23,6 +22,7 @@ public class WarnCommand extends Command implements CommandExecutor {
 
     @Override
     public boolean execute(CommandSender sender, String s, String[] args) {
+        // 检查权限
         if (sender instanceof Player) {
             Player player = (Player) sender;
             if (!sender.isOp() && !player.hasPermission("lengbanlist.warn")) {
@@ -31,51 +31,43 @@ public class WarnCommand extends Command implements CommandExecutor {
             }
         }
 
+        // 检查参数长度
         if (args.length < 2) {
             Utils.sendMessage(sender, plugin.prefix() + "§c用法错误: /lban warn <玩家名/IP> <原因>");
             return false;
         }
 
+        String target = args[0];
+        String reason = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
+        WarnManager warnManager = plugin.getWarnManager();
+
         // 检查是否是 IP
-        if (args[0].contains(".")) {
-            if (!plugin.getBanManager().isValidIp(args[0])) {
+        boolean isIp = target.contains(".");
+
+        // 获取有效警告记录（未撤销的）
+        List<WarnEntry> activeWarnings = warnManager.getActiveWarnings(target);
+
+        // 检查是否是 IP 地址
+        if (isIp) {
+            if (!plugin.getBanManager().isValidIp(target)) {
                 Utils.sendMessage(sender, plugin.prefix() + "§c无效的IP地址");
                 return false;
             }
             // IP警告逻辑
-            plugin.getWarnManager().warnIp(args[0], sender.getName(), 
-                String.join(" ", Arrays.copyOfRange(args, 1, args.length)));
-            Utils.sendMessage(sender, plugin.prefix() + "§a已警告IP: " + args[0]);
+            warnManager.warnPlayer(target, sender.getName(), reason);
+            Utils.sendMessage(sender, plugin.prefix() + "§a已警告IP: " + target);
             return true;
         }
 
         // 玩家警告逻辑
-        String target = args[0];
-        String reason = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
-
-        Model currentModel = plugin.getModelManager().getCurrentModel();
-        WarnManager warnManager = plugin.getWarnManager();
-
-        List<WarnEntry> warnings = warnManager.getActiveWarnings(target);
-        if (warnings.size() >= 3) {
-            Utils.sendMessage(sender, plugin.prefix() + "§c玩家 " + target + " 已被警告 3 次，无法继续警告，请unwarn该玩家后再给予警告！");
+        if (activeWarnings.size() >= 3) {
+            Utils.sendMessage(sender, plugin.prefix() + "§c玩家 " + target + " 已被警告 3 次，无法再次警告喵！");
+            Utils.sendMessage(sender, plugin.prefix() + "§c请/unwarn " + target + " ，再执行警告操作喵！");
             return false;
         }
 
         warnManager.warnPlayer(target, sender.getName(), reason);
-        Utils.sendMessage(sender, currentModel.addWarn(target, reason));
-
-        if (warnings.size() + 1 >= 3) {
-            // 使用WarnManager的计算方法而不是硬编码永久封禁
-            long banDuration = plugin.getWarnManager().calculateBanDuration(1); // 第一次触发
-            plugin.getBanManager().banPlayer(new org.leng.object.BanEntry(
-                target, 
-                "System", 
-                System.currentTimeMillis() + banDuration, 
-                "警告次数过多", 
-                true));
-            Utils.sendMessage(sender, plugin.prefix() + "§c警告次数过多，已自动封禁玩家 " + target + "。");
-        }
+        Utils.sendMessage(sender, plugin.prefix() + "§a已警告玩家 " + target + ": " + reason);
 
         return true;
     }

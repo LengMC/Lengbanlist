@@ -21,14 +21,7 @@ public class WarnManager {
         checkAutoBan(player);
     }
 
-    // 警告 IP
-    public void warnIp(String ip, String staff, String reason) {
-        WarnEntry entry = new WarnEntry(ip, staff, System.currentTimeMillis(), reason);
-        warnList.add(entry);
-        // IP 警告不触发自动封禁
-    }
-
-    // 获取某玩家的所有警告记录
+    // 获取某玩家的所有警告记录（包括已撤销的）
     public List<WarnEntry> getAllWarnings(String target) {
         return warnList.stream()
                 .filter(e -> e.getPlayer().equalsIgnoreCase(target))
@@ -49,6 +42,10 @@ public class WarnManager {
             WarnEntry entry = playerWarnings.get(warnId - 1);
             if (!entry.isRevoked()) {
                 entry.revoke();
+                
+                // 检查是否需要解封
+                checkUnbanIfNecessary(target);
+                
                 return true;
             }
         }
@@ -60,9 +57,9 @@ public class WarnManager {
         long now = System.currentTimeMillis();
         long timeWindow = 30L * 24 * 60 * 60 * 1000; // 30天时间窗口
 
-        List<WarnEntry> validWarnings = warnList.stream()
-                .filter(e -> e.getPlayer().equalsIgnoreCase(player))
-                .filter(e -> !e.isRevoked())
+        // 包括已撤销警告在内的所有警告
+        List<WarnEntry> allWarnings = getAllWarnings(player);
+        List<WarnEntry> validWarnings = allWarnings.stream()
                 .filter(e -> (now - e.getTime()) <= timeWindow)
                 .collect(Collectors.toList());
 
@@ -77,7 +74,7 @@ public class WarnManager {
                     player,
                     "LBAC",
                     now + banDuration,
-                    String.format("自动封禁（%d次警告，第%d次触发） <LBAC>", 
+                    String.format("自动封禁（累计%d次警告，第%d次触发） <LBAC>", 
                             validWarnings.size(), triggerCount),
                     true
             );
@@ -88,6 +85,30 @@ public class WarnManager {
                     "§6[LBAC] §e%s §c因30天内累计%d次警告被自动封禁§a%s §6<此封禁由系统决定>",
                     player, validWarnings.size(), formattedDuration);
             Lengbanlist.getInstance().getServer().broadcastMessage(message);
+        }
+    }
+
+    // 检查撤销警告后是否需要解封
+    public void checkUnbanIfNecessary(String player) {
+        long now = System.currentTimeMillis();
+        long timeWindow = 30L * 24 * 60 * 60 * 1000; // 30天时间窗口
+
+        // 包括已撤销警告在内的所有警告
+        List<WarnEntry> allWarnings = getAllWarnings(player);
+        List<WarnEntry> validWarnings = allWarnings.stream()
+                .filter(e -> (now - e.getTime()) <= timeWindow)
+                .collect(Collectors.toList());
+
+        // 如果警告次数少于3次，则检查是否需要解封
+        if (validWarnings.size() < 3) {
+            // 检查玩家是否因警告次数过多被封禁
+            if (Lengbanlist.getInstance().getBanManager().isBanned(player, "LBAC")) {
+                Lengbanlist.getInstance().getBanManager().unbanPlayer(player);
+                String message = String.format(
+                        "§6[LBAC] §e%s §a因警告次数减少至%d次，自动解封",
+                        player, validWarnings.size());
+                Lengbanlist.getInstance().getServer().broadcastMessage(message);
+            }
         }
     }
 

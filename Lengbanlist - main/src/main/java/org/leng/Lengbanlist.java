@@ -39,6 +39,7 @@ public class Lengbanlist extends JavaPlugin {
     private FileConfiguration broadcastFC;
     private FileConfiguration warnFC;
     private FileConfiguration reportFC; 
+    private FileConfiguration chatConfig;
     private ModelChoiceListener modelChoiceListener;
     private String hitokoto;
     private ModelManager modelManager;
@@ -96,6 +97,13 @@ public class Lengbanlist extends JavaPlugin {
         warnFC = YamlConfiguration.loadConfiguration(warnFile);
         reportFC = YamlConfiguration.loadConfiguration(reportFile); 
 
+         // 初始化 chatConfig
+        File chatConfigFile = new File(getDataFolder(), "chatconfig.yml");
+        if (!chatConfigFile.exists()) {
+            chatConfigFile.getParentFile().mkdirs();
+            saveResource("chatconfig.yml", false);
+        }
+        chatConfig = YamlConfiguration.loadConfiguration(chatConfigFile);
         // 获取一言并存储到成员变量
         hitokoto = getHitokoto();
 
@@ -119,6 +127,7 @@ public void onEnable() {
 
     // 注册监听器
     getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
+    getServer().getPluginManager().registerEvents(new ChatListener(this), this); 
     getServer().getPluginManager().registerEvents(new OpJoinListener(this), this);
     getServer().getPluginManager().registerEvents(new ChestUIListener(this), this);
     getServer().getPluginManager().registerEvents(new AnvilGUIListener(this), this);
@@ -138,6 +147,8 @@ public void onEnable() {
     getCommand("admin").setExecutor(new AdminReportCommand(this));
     getCommand("kick").setExecutor(new KickCommand(this));
     getCommand("info").setExecutor(new InfoCommand(this));
+    getCommand("allowmsg").setExecutor(new AllowMsgCommand(this)); 
+    getCommand("warnmsg").setExecutor(new WarnMsgCommand(this)); 
 
     getServer().getConsoleSender().sendMessage("§b  _                      ____              _      _     _   ");
     getServer().getConsoleSender().sendMessage("§6 | |                    |  _ \\            | |    (_)   | |  ");
@@ -463,4 +474,7 @@ public void onEnable() {
     public LanguageManager getLanguageManager() {
         return languageManager;
     }
+    public FileConfiguration getChatConfig() {
+    return chatConfig;
+}
 }

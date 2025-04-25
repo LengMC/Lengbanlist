@@ -212,7 +212,7 @@ public class BanManager {
                 String staff = parts[1];
                 long time = Long.parseLong(parts[2]);
                 String reason = parts[3];
-                return new BanIpEntry(ip, staff, time, reason,false);
+                return new BanIpEntry(ip, staff, time, reason, false);
             }
         }
         return null;
@@ -238,5 +238,11 @@ public class BanManager {
             }
         }
         return true;
+    }
+
+    // 新增方法：检查玩家是否因特定原因被封禁
+    public boolean isBanned(String player, String reason) {
+        BanEntry banEntry = getBanEntry(player);
+        return banEntry != null && banEntry.getReason().contains(reason);
     }
 }

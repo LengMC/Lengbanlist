@@ -4,14 +4,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.leng.Lengbanlist;
 import org.leng.manager.BanManager;
-import org.leng.manager.MuteManager;
 import org.leng.manager.ReportManager;
 import org.leng.object.ReportEntry;
 import org.leng.utils.SaveIP;
-import org.leng.utils.Utils;
 
 import java.util.List;
 
@@ -47,15 +44,6 @@ public class PlayerJoinListener implements Listener {
                 report.setStatus("已读");
             }
             reportManager.saveReports();
-        }
-    }
-
-    @EventHandler
-    public void onPlayerChat(AsyncPlayerChatEvent event) {
-        Player player = event.getPlayer();
-        if (plugin.getMuteManager().isPlayerMuted(player.getName())) {
-            event.setCancelled(true); // 取消发言事件
-            player.sendMessage(plugin.prefix() + "§c你不准说话喵！"); // 发送提示
         }
     }
 }

@@ -608,62 +608,52 @@ private void handleReportSubmit(Player player, String target, String reason) {
         }
     }
 
-    @EventHandler
-    public void onInventoryClick(InventoryClickEvent event) {
-        if (event.getView().getTitle().equals("§bLengbanlist")) {
-            event.setCancelled(true);
+@EventHandler
+public void onInventoryClick(InventoryClickEvent event) {
+    if (event.getView().getTitle().equals("§bLengbanlist")) {
+        event.setCancelled(true);
 
-            Player player = (Player) event.getWhoClicked();
-            ItemStack clickedItem = event.getCurrentItem();
+        Player player = (Player) event.getWhoClicked();
+        ItemStack clickedItem = event.getCurrentItem();
 
-            if (clickedItem == null || !clickedItem.hasItemMeta()) {
-                return;
-            }
-
-            String command = clickedItem.getItemMeta().getLore().get(0).replace("§7", "");
-
-            switch (command) {
-                case "/lban toggle":
-                    player.performCommand("lban toggle");
-                    break;
-                case "/lban a":
-                    player.performCommand("lban a");
-                    break;
-                case "/lban list":
-                    player.performCommand("lban list");
-                    break;
-                case "/lban reload":
-                    player.performCommand("lban reload");
-                    break;
-                case "/lban add":
-                    plugin.getChestUIListener().openAnvilForBan(player, "playerID");
-                    break;
-                case "/lban remove":
-                    plugin.getChestUIListener().openAnvilForUnban(player);
-                    break;
-                case "/lban help":
-                    player.performCommand("lban help");
-                    break;
-                case "/lengbanlist model":
-                    ModelManager.getInstance().openModelSelectionUI(player);
-                    break;
-                case "/lban mute":
-                    plugin.getChestUIListener().openAnvilForMute(player, "playerID");
-                    break;
-                case "/lban unmute":
-                    plugin.getChestUIListener().openAnvilForUnmute(player);
-                    break;
-                case "/lban list-mute":
-                    player.performCommand("lban list-mute");
-                    break;
-                case "/lban language":
-                    player.performCommand("lban language");
-                    break;
-                default:
-                    player.performCommand(command);
-                    break;
-            }
+        if (clickedItem == null || !clickedItem.hasItemMeta()) {
+            return;
         }
+
+        String command = clickedItem.getItemMeta().getLore().get(0).replace("§7", "");
+
+        switch (command) {
+            case "/lban toggle":
+            case "/lban a":
+            case "/lban list":
+            case "/lban reload":
+            case "/lban help":
+            case "/lban list-mute":
+            case "/lban language":
+                player.performCommand(command);
+                break;
+            case "/lban add":
+                plugin.getChestUIListener().openAnvilForBan(player, "playerID");
+                break;
+            case "/lban remove":
+                plugin.getChestUIListener().openAnvilForUnban(player);
+                break;
+            case "/lban model": 
+                ModelManager.getInstance().openModelSelectionUI(player);
+                break;
+            case "/lban mute":
+                plugin.getChestUIListener().openAnvilForMute(player, "playerID");
+                break;
+            case "/lban unmute":
+                plugin.getChestUIListener().openAnvilForUnmute(player);
+                break;
+            default:
+                if (command.startsWith("/")) {
+                    player.performCommand(command.substring(1));  // 移除多余斜杠避免双重前缀
+                }
+                break;
+        }
+    }
 
         if (event.getView().getTitle().equals("§a选择语言")) {
             event.setCancelled(true);
