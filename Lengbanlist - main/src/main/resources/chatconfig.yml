@@ -4,7 +4,7 @@ bad-words:
   - "l"
   - "FW"
   - "FV"
-  -"SB"
+  - "SB"
   - "cnm"
 
 # 禁言阈值
