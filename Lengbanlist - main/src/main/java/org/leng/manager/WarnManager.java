@@ -74,7 +74,7 @@ public class WarnManager {
                     player,
                     "LBAC",
                     now + banDuration,
-                    String.format("自动封禁（累计%d次警告，第%d次触发） <LBAC>", 
+                    String.format("LBAC自动封禁（累计%d次警告，第%d次触发）", 
                             validWarnings.size(), triggerCount),
                     true
             );

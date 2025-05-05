@@ -1,6 +1,6 @@
 name: Lengbanlist
 main: org.leng.Lengbanlist
-version: 1.7.2
+version: 1.7.3
 api-version: 1.21
 commands:
   lban:
@@ -39,3 +39,9 @@ commands:
   kick:
     description: 踢出玩家
     usage: /<command> <玩家名> [原因]
+   allowmsg:
+    description: 允许消息
+    usage: /<command> <玩家名> 
+    warnmsg:
+    description: 拒绝消息
+    usage: /<command> <玩家名> 
