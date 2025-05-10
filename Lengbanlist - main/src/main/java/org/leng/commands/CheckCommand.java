@@ -15,6 +15,11 @@ import org.leng.utils.TimeUtils;
 import org.leng.utils.Utils;
 import org.leng.object.WarnEntry;
 
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -69,13 +74,21 @@ public class CheckCommand extends Command implements CommandExecutor {
         boolean isOp = player.isOp();
         List<WarnEntry> warnings = plugin.getWarnManager().getActiveWarnings(playerName);
 
+        // 特殊处理作者shazi_awa
+        String specialTag = "shazi_awa".equalsIgnoreCase(playerName) ? "§c[DEV] " : "";
+
         Utils.sendMessage(sender, plugin.prefix() + "§a玩家信息：");
-        Utils.sendMessage(sender, plugin.prefix() + "§b玩家名: " + playerName);
+        Utils.sendMessage(sender, plugin.prefix() + "§b玩家名: " + specialTag + playerName);
         Utils.sendMessage(sender, plugin.prefix() + "§bUUID: " + uuid);
         Utils.sendMessage(sender, plugin.prefix() + "§b最后登录时间: " + lastLoginTime);
         Utils.sendMessage(sender, plugin.prefix() + "§b是否禁言: " + (isMuted ? "是" : "否"));
         Utils.sendMessage(sender, plugin.prefix() + "§b是否封禁: " + (isBanned ? "是" : "否"));
         Utils.sendMessage(sender, plugin.prefix() + "§b是否是OP: " + (isOp ? "是" : "否"));
+
+        // 如果是作者shazi_awa，显示赞助信息
+        if ("shazi_awa".equalsIgnoreCase(playerName)) {
+            showSponsorInfo(sender);
+        }
 
         if (warnings.isEmpty()) {
             Utils.sendMessage(sender, plugin.prefix() + "§b警告: 无警告");
@@ -109,5 +122,31 @@ public class CheckCommand extends Command implements CommandExecutor {
             }
         }
         return players;
+    }
+
+    private void showSponsorInfo(CommandSender sender) {
+        if (sender instanceof Player) {
+            Player player = (Player) sender;
+
+            // 创建可点击的赞助按钮
+            TextComponent sponsorButton = new TextComponent(plugin.prefix() + "§6支持作者，让他更有动力开发插件！§b[§a点击赞助§b]");
+            sponsorButton.setHoverEvent(new HoverEvent(net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_TEXT,
+                    new ComponentBuilder("§a点击支持作者§bawa").create()));
+            sponsorButton.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://afdian.com/a/lengbanlist"));
+
+            // 发送赞助按钮
+            player.spigot().sendMessage(sponsorButton);
+
+            // 发送赞助方案描述信息
+            Utils.sendMessage(player, plugin.prefix() + "§b请我喝杯奶茶：￥20.00 CNY/月 - 加入感谢名单，优先反馈");
+            Utils.sendMessage(player, plugin.prefix() + "§bBETA权限组：￥50.00 CNY/月 - 解锁高级功能，优先支持");
+            Utils.sendMessage(player, plugin.prefix() + "§b一次性打赏：任意金额 - 表达你的支持");
+        } else {
+            // 如果不是玩家（例如控制台），发送普通消息
+            Utils.sendMessage(sender, plugin.prefix() + "§6支持作者，让他更有动力开发插件！§b[§a点击赞助§b] §c(https://afdian.com/a/lengbanlist)");
+            Utils.sendMessage(sender, plugin.prefix() + "§b请我喝杯奶茶：￥20.00 CNY/月 - 加入感谢名单，优先反馈");
+            Utils.sendMessage(sender, plugin.prefix() + "§bBETA权限组：￥50.00 CNY/月 - 解锁高级功能，优先支持");
+            Utils.sendMessage(sender, plugin.prefix() + "§b一次性打赏：任意金额 - 表达你的支持");
+        }
     }
 }
