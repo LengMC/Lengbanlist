@@ -4,19 +4,15 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.leng.Lengbanlist;
+import org.leng.utils.GitHubUpdateChecker;
 import org.leng.utils.Utils;
-
-import javax.management.*;
 import java.lang.management.ManagementFactory;
-import java.util.logging.Logger;
 
 public class InfoCommand implements CommandExecutor {
     private final Lengbanlist plugin;
-    private final Logger logger;
 
     public InfoCommand(Lengbanlist plugin) {
         this.plugin = plugin;
-        this.logger = plugin.getLogger();
     }
 
     @Override
@@ -28,13 +24,7 @@ public class InfoCommand implements CommandExecutor {
 
         // 获取服务器信息
         String serverVersion = plugin.getServer().getVersion();
-        String serverCore = "Unknown";
-        try {
-            serverCore = plugin.getServer().getClass().getPackage().getName().split("\\.")[3];
-        } catch (ArrayIndexOutOfBoundsException e) {
-            logger.warning("无法获取服务端核心名称");
-        }
-
+        String serverCore = getServerCoreName();
         long usedMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
         long totalMemory = Runtime.getRuntime().totalMemory();
         int onlinePlayers = plugin.getServer().getOnlinePlayers().size();
@@ -49,21 +39,47 @@ public class InfoCommand implements CommandExecutor {
         infoMessage.append("§7当前在线玩家：§b").append(onlinePlayers).append("\n");
         infoMessage.append("§7当前CPU占用：§b").append(String.format("%.2f", cpuLoad)).append("%\n");
 
-        Utils.sendMessage(sender, infoMessage.toString());
+        // 异步检查更新
+        if (!plugin.getConfig().getBoolean("disable-update-check", false)) {
+            GitHubUpdateChecker.getLatestReleaseVersionAsync(plugin).thenAccept(latestVersion -> {
+                String message;
+                if (latestVersion == null) {
+                    message = "§c检查更新失败，请检查网络连接或稍后再试。\n";
+                } else if (GitHubUpdateChecker.compareVersions(plugin.getDescription().getVersion(), latestVersion) < 0) {
+                    message = "§a发现新版本：§e" + latestVersion + "§a，当前版本：§e" + plugin.getDescription().getVersion() + "\n" +
+                             "§b更新地址：§ehttps://github.com/LengMC/Lengbanlist/releases\n";
+                } else {
+                    message = "§a你正在使用最新版本：§e" + plugin.getDescription().getVersion() + "\n";
+                }
+                Utils.sendMessage(sender, infoMessage.toString() + message);
+            });
+        } else {
+            infoMessage.append("§a更新检查已禁用\n");
+            Utils.sendMessage(sender, infoMessage.toString());
+        }
+
         return true;
+    }
+
+    private String getServerCoreName() {
+        try {
+            String serverPackage = plugin.getServer().getClass().getPackage().getName();
+            if (serverPackage.contains("spigot")) return "Spigot";
+            else if (serverPackage.contains("paper")) return "Paper";
+            else if (serverPackage.contains("leaves")) return "Leaves";
+            else if (serverPackage.contains("bukkit")) return "Bukkit";
+            else return "Unknown";
+        } catch (Exception e) {
+            return "Unknown";
+        }
     }
 
     private double getSystemCpuLoad() {
         try {
-            MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-            ObjectName name = ObjectName.getInstance("java.lang:type=OperatingSystem");
-            AttributeList list = mbs.getAttributes(name, new String[]{"SystemCpuLoad"});
-            if (list.isEmpty()) return 0.0;
-            Attribute att = (Attribute) list.get(0);
-            Double value = (Double) att.getValue();
-            return value * 100;
+            com.sun.management.OperatingSystemMXBean osBean = 
+                (com.sun.management.OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
+            return osBean.getSystemCpuLoad() * 100;
         } catch (Exception e) {
-            logger.warning("获取CPU负载失败: " + e.getMessage());
             return 0.0;
         }
     }

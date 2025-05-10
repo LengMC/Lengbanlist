@@ -10,6 +10,7 @@ import org.leng.Lengbanlist;
 
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.util.concurrent.CompletableFuture;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
@@ -99,7 +100,7 @@ public class GitHubUpdateChecker {
      * @param version2 版本号2
      * @return 如果 version1 小于 version2，返回 -1；如果 version1 等于 version2，返回 0；如果 version1 大于 version2，返回 1
      */
-    private static int compareVersions(String version1, String version2) {
+    public static int compareVersions(String version1, String version2) {
         String[] parts1 = version1.split("\\.");
         String[] parts2 = version2.split("\\.");
 
@@ -127,6 +128,23 @@ public class GitHubUpdateChecker {
     public static boolean isUpdateAvailable(String localVersion) throws Exception {
         String latestVersion = getLatestReleaseVersion();
         return compareVersions(localVersion, latestVersion) < 0; // 当前版本小于最新版本时才返回 true
+    }
+    
+        /**
+     * 异步获取最新版本号
+     *
+     * @param plugin 插件实例
+     * @return CompletableFuture<String> 包含最新版本号的Future
+     */
+    public static CompletableFuture<String> getLatestReleaseVersionAsync(Lengbanlist plugin) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                return getLatestReleaseVersion();
+            } catch (Exception e) {
+                plugin.getLogger().warning("异步获取最新版本失败: " + e.getMessage());
+                return null;
+            }
+        });
     }
 
     /**

@@ -13,7 +13,7 @@ public class Furina implements Model {
 @Override
 public void showHelp(CommandSender sender) {
     Utils.sendMessage(sender, "§b╔══════════════════════════════════╗");
-    Utils.sendMessage(sender, "§b║ §2§oLengbanlist 帮助信息 - 默认风格 §b║");
+    Utils.sendMessage(sender, "§b║ §2§oLengbanlist 帮助信息 - 芙宁娜风格 §b║");
     Utils.sendMessage(sender, "§b╠══════════════════════════════════╣");
     Utils.sendMessage(sender, "§2✦ §b/lban list §7- §3查看被封禁的名单");
     Utils.sendMessage(sender, "§2✦ §b/lban a §7- §3广播当前封禁人数");
@@ -45,8 +45,9 @@ public void showHelp(CommandSender sender) {
     Utils.sendMessage(sender, "§7-> §2§l/report close <举报编号> §7- §3关闭举报，问题已解决。");
     Utils.sendMessage(sender, "§2✦ §b/kick <玩家名> <原因> §7- §3踢出不守规矩的玩家！");
     Utils.sendMessage(sender, "§2✦ §b/lban info §7- §3查看插件信息，了解当前运行状态");
+    Utils.sendMessage(sender, "§2✦ §b/setban <玩家名/IP> <时间/forever/auto> <原因> §7- §3重新设置封禁时间，芙宁娜说：‘别再划水啦！’");
     Utils.sendMessage(sender, "§b╚══════════════════════════════════╝");
-    Utils.sendMessage(sender, "§2♡ 当前版本: " + Lengbanlist.getInstance().getPluginVersion() + " §7| §b模型: 默认 Default");
+    Utils.sendMessage(sender, "§2♡ 当前版本: " + Lengbanlist.getInstance().getPluginVersion() + " §7| §b模型: 芙宁娜 Furina");
 }
 
     @Override

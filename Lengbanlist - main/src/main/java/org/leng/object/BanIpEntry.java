@@ -15,24 +15,45 @@ public class BanIpEntry {
         this.isAuto = isAuto;
     }
 
+    // Getters and setters
     public String getIp() {
         return ip;
+    }
+
+    public void setIp(String ip) {
+        this.ip = ip;
     }
 
     public String getStaff() {
         return staff;
     }
 
+    public void setStaff(String staff) {
+        this.staff = staff;
+    }
+
     public long getTime() {
         return time;
+    }
+
+    public void setEndTime(long time) {
+        this.time = time;
     }
 
     public String getReason() {
         return reason;
     }
 
+    public void setReason(String reason) {
+        this.reason = reason;
+    }
+
     public boolean isAuto() {
         return isAuto;
+    }
+
+    public void setAuto(boolean isAuto) {
+        this.isAuto = isAuto;
     }
 
     @Override

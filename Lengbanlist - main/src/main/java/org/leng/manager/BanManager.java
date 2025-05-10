@@ -245,4 +245,12 @@ public class BanManager {
         BanEntry banEntry = getBanEntry(player);
         return banEntry != null && banEntry.getReason().contains(reason);
     }
+    
+        public void saveBanList() {
+        Lengbanlist.getInstance().saveBanConfig();
+    }
+
+    public void saveBanIpConfig() {
+        Lengbanlist.getInstance().saveBanIpConfig();
+    }
 }
