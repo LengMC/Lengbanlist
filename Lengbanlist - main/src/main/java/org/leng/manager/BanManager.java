@@ -13,24 +13,41 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BanManager {
-    // 封禁玩家（修复编译错误）
+    // 封禁玩家（修复时间计算和保存逻辑）
     public void banPlayer(BanEntry banEntry) {
+        // 计算封禁天数（用于模型接口）
+        long durationMillis = banEntry.getRemainingTime();
+        int durationDays = (int) (durationMillis / (1000 * 60 * 60 * 24));
+        
         Model currentModel = Lengbanlist.getInstance().getModelManager().getCurrentModel();
         String banResult = currentModel.addBan(
             banEntry.getTarget(), 
-            (int)((banEntry.getTime() - System.currentTimeMillis()) / (1000 * 60 * 60 * 24)), 
+            durationDays, 
             banEntry.getReason()
         );
         
         if (banResult != null && !banResult.isEmpty()) {
-            String ban = banEntry.toString();
+            // 添加到封禁列表
             List<String> banList = Lengbanlist.getInstance().getBanFC().getStringList("ban-list");
-            banList.add(ban);
+            banList.removeIf(e -> e.startsWith(banEntry.getTarget() + ":")); // 移除旧记录
+            banList.add(banEntry.toString());
+            
             Lengbanlist.getInstance().getBanFC().set("ban-list", banList);
             Lengbanlist.getInstance().saveBanConfig();
+            
+            // 踢出玩家并广播
             Player targetPlayer = Bukkit.getPlayer(banEntry.getTarget());
             if (targetPlayer != null) {
-                targetPlayer.kickPlayer(banResult);
+                String kickMessage = String.format(
+                    "§c您已被封禁!\n" +
+                    "§f原因: §e%s\n" +
+                    "§f封禁时长: §a%s\n" +
+                    "§f解封时间: §b%s",
+                    banEntry.getReason(),
+                    TimeUtils.formatDuration(durationMillis),
+                    TimeUtils.timestampToReadable(banEntry.getEndTime())
+                );
+                targetPlayer.kickPlayer(kickMessage);
             }
             Bukkit.broadcastMessage(banResult);
         } else {
@@ -39,19 +56,23 @@ public class BanManager {
         }
     }
 
-    // 封禁 IP（修复编译错误）
+    // 封禁IP（同样修复时间处理）
     public void banIp(BanIpEntry banIpEntry) {
+        long durationMillis = banIpEntry.getTime() - System.currentTimeMillis();
+        int durationDays = (int) (durationMillis / (1000 * 60 * 60 * 24));
+        
         Model currentModel = Lengbanlist.getInstance().getModelManager().getCurrentModel();
         String banIpResult = currentModel.addBanIp(
             banIpEntry.getIp(), 
-            (int)((banIpEntry.getTime() - System.currentTimeMillis()) / (1000 * 60 * 60 * 24)), 
+            durationDays, 
             banIpEntry.getReason()
         );
         
         if (banIpResult != null && !banIpResult.isEmpty()) {
-            String banIp = banIpEntry.toString();
             List<String> banIpList = Lengbanlist.getInstance().getBanIpFC().getStringList("banip-list");
-            banIpList.add(banIp);
+            banIpList.removeIf(e -> e.startsWith(banIpEntry.getIp() + ":"));
+            banIpList.add(banIpEntry.toString());
+            
             Lengbanlist.getInstance().getBanIpFC().set("banip-list", banIpList);
             Lengbanlist.getInstance().saveBanIpConfig();
             Bukkit.broadcastMessage(banIpResult);
@@ -60,8 +81,7 @@ public class BanManager {
             Bukkit.getLogger().warning("通过模型 [" + modelName + "] 封禁 IP [" + banIpEntry.getIp() + "] 失败！");
         }
     }
-
-    // 以下是原有代码保持不变
+    
     public void unbanPlayer(String target) {
         Model currentModel = Lengbanlist.getInstance().getModelManager().getCurrentModel();
         String unbanResult = currentModel.removeBan(target);
