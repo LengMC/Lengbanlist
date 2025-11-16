@@ -1,5 +1,4 @@
-`
-prefix: "§f§l[§bLengbanlist§f§l]"
+`prefix: "§f§l[§bLengbanlist§f§l]"
 sendtime: 5 #已分钟为单位
 opensendtime: true #开启循环播报封禁人数
 Model: "Default"
@@ -42,5 +41,5 @@ database:
 #————————————————————————
 #作者：LengMC（插件作者：享有插件著作和解释说明权），Leng(xiaoshaziYA)
 #编于：2025年11月15日
-#————————————————————————
-`
+#————————————————————————`
+
