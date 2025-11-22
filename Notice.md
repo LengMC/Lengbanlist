@@ -5,6 +5,7 @@
 - 2.本插件功能上绝对免费，此插件禁止倒卖，一经发现，严肃处理
 - 3.本插件使用MPL - 2.0开源协议开源，请您注意，禁止违反开源协议，本插件追加插件开发的一切权限，包括但不限于解释权，禁用权等
 - 4.使用或fork自本插件的项目应使用对应的许可证，同时你需要注意一些许可证禁止的行为
+- 5.本插件为个人开发的免费同人作品。'魈'、'胡桃'及其相关形象版权均为米哈游所有。本插件与米哈游无任何官方关联，不用于任何商业用途
 ————————————————————————
 - About：
 #This plugin is designed to provide a portable integration of banning and querying for high - version Minecraft servers. It is fully based on the local system and offers customizable models for users to choose from. It features good performance and will be regularly updated.
@@ -25,6 +26,6 @@
 
 
 - **作者：LengMC（插件作者：享有插件著作和解释说明权），Leng(xiaoshaziYA)**
-- *编于：2025年11月15日*
+- *编于：2025年11月22日*
 ————————————————————————
 ---
