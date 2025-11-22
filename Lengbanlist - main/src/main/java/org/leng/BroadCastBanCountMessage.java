@@ -12,8 +12,19 @@ import net.md_5.bungee.api.chat.ComponentBuilder;
 public class BroadCastBanCountMessage extends BukkitRunnable {
     @Override
     public void run() {
-        if (!Lengbanlist.getInstance().getServer().getOnlinePlayers().isEmpty()) {
-            for (Player player : Lengbanlist.getInstance().getServer().getOnlinePlayers()) {
+        // 检查插件是否仍然启用
+        if (!Lengbanlist.getInstance().isEnabled()) {
+            this.cancel();
+            return;
+        }
+        
+        // 检查是否有在线玩家
+        if (Bukkit.getOnlinePlayers().isEmpty()) {
+            return;
+        }
+        
+        try {
+            for (Player player : Bukkit.getOnlinePlayers()) {
                 // 获取默认消息
                 String defaultMessage = Lengbanlist.getInstance().getBroadcastFC().getString("default-message");
 
@@ -44,6 +55,8 @@ public class BroadCastBanCountMessage extends BukkitRunnable {
                 // 发送消息
                 player.spigot().sendMessage(mainMessage, clickableComponent);
             }
+        } catch (Exception e) {
+            Lengbanlist.getInstance().getLogger().warning("广播任务执行出错: " + e.getMessage());
         }
     }
 }

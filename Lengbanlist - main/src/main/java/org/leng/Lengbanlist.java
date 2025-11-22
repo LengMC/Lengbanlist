@@ -1,7 +1,6 @@
 package org.leng;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Bukkit.*;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.command.CommandMap;
@@ -21,7 +20,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.io.FileWriter;
 
 public class Lengbanlist extends JavaPlugin {
     private static Lengbanlist instance;
@@ -42,11 +40,40 @@ public class Lengbanlist extends JavaPlugin {
     private ModelChoiceListener modelChoiceListener;
     private String hitokoto;
     private ModelManager modelManager;
+    private FileConfiguration eulaFC;
+    
+    private boolean isFolia = false;
+    private boolean eulaAgreed = false;
 
     @Override
     public void onLoad() {
+        try {
+            Class.forName("io.papermc.paper.threadedregions.RegionizedServer");
+            isFolia = true;
+        } catch (ClassNotFoundException e) {
+            isFolia = false;
+        }
+        
         saveDefaultConfig();
         instance = this;
+        
+        File eulaFile = new File(getDataFolder(), "eula.yml");
+        if (!eulaFile.exists()) {
+            eulaFile.getParentFile().mkdirs();
+            saveResource("eula.yml", false);
+            eulaAgreed = false;
+            return;
+        }
+        
+        eulaFC = YamlConfiguration.loadConfiguration(eulaFile);
+        String agreement = eulaFC.getString("I have read and agree", "no");
+       eulaAgreed = "yes".equalsIgnoreCase(agreement != null ? agreement.trim() : "no");
+        
+        if (!eulaAgreed) {
+            return;
+        }
+        
+        // EULA 同意后才初始化
         banManager = new BanManager();
         muteManager = new MuteManager();
         warnManager = new WarnManager();
@@ -54,7 +81,6 @@ public class Lengbanlist extends JavaPlugin {
         isBroadcast = getConfig().getBoolean("opensendtime");
         modelManager = ModelManager.getInstance();
 
-        // 初始化 ipFC
         File ipFile = new File(getDataFolder(), "ip.yml");
         if (!ipFile.exists()) {
             ipFile.getParentFile().mkdirs();
@@ -62,7 +88,6 @@ public class Lengbanlist extends JavaPlugin {
         }
         ipFC = YamlConfiguration.loadConfiguration(ipFile);
 
-        // 初始化其他配置文件
         File banFile = new File(getDataFolder(), "ban-list.yml");
         File banIpFile = new File(getDataFolder(), "banip-list.yml");
         File muteFile = new File(getDataFolder(), "mute-list.yml");
@@ -94,17 +119,15 @@ public class Lengbanlist extends JavaPlugin {
         warnFC = YamlConfiguration.loadConfiguration(warnFile);
         reportFC = YamlConfiguration.loadConfiguration(reportFile); 
 
-         // 初始化 chatConfig
         File chatConfigFile = new File(getDataFolder(), "chatconfig.yml");
         if (!chatConfigFile.exists()) {
             chatConfigFile.getParentFile().mkdirs();
             saveResource("chatconfig.yml", false);
         }
         chatConfig = YamlConfiguration.loadConfiguration(chatConfigFile);
-        // 获取一言并存储到成员变量
+        
         hitokoto = getHitokoto();
 
-        // 初始化 broadcastFC
         File broadcastFile = new File(getDataFolder(), "broadcast.yml");
         if (!broadcastFile.exists()) {
             broadcastFile.getParentFile().mkdirs();
@@ -113,59 +136,76 @@ public class Lengbanlist extends JavaPlugin {
         broadcastFC = YamlConfiguration.loadConfiguration(broadcastFile);
     }
 
-    @Override
-    public void onEnable() {
-        getServer().getConsoleSender().sendMessage(prefix() + "§f原神§2正在加载");
-        getServer().getConsoleSender().sendMessage(prefix() + ModelManager.getInstance().getCurrentModelName() + "§6偷偷告诉你: §e" + hitokoto);
-        getServer().getConsoleSender().sendMessage(prefix() + "§f哇！传送锚点已解锁，当前Model: " + ModelManager.getInstance().getCurrentModelName());
+@Override
+public void onEnable() {
+    if (!eulaAgreed) {
+        getLogger().severe("==================================================");
+        getLogger().severe("插件启用被终止：您需要同意EULA才能使用本插件！");
+        getLogger().severe("请编辑 plugins/Lengbanlist/eula.yml 文件");
+        getLogger().severe("==================================================");
+        Bukkit.getPluginManager().disablePlugin(Lengbanlist.this);
+        return;
+    }
 
-        // 注册监听器
-        getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
-        getServer().getPluginManager().registerEvents(new ChatListener(this), this); 
-        getServer().getPluginManager().registerEvents(new OpJoinListener(this), this);
-        getServer().getPluginManager().registerEvents(new ChestUIListener(this), this);
-        getServer().getPluginManager().registerEvents(new AnvilGUIListener(this), this);
-        modelChoiceListener = new ModelChoiceListener(this);
-        getServer().getPluginManager().registerEvents(modelChoiceListener, this);
+    if (!Lengbanlist.this.isEnabled()) {
+        return;
+    }
 
-        // 注册命令
-        getCommand("lban").setExecutor(new LengbanlistCommand("lban", this));
-        getCommand("ban").setExecutor(new BanCommand(this));
-        getCommand("ban-ip").setExecutor(new BanIpCommand(this));
-        getCommand("unban").setExecutor(new UnbanCommand(this));
-        getCommand("warn").setExecutor(new WarnCommand(this));
-        getCommand("unwarn").setExecutor(new UnwarnCommand(this));
-        getCommand("check").setExecutor(new CheckCommand(this));
-        getCommand("report").setExecutor(new ReportCommand(this)); 
-        getCommand("admin").setExecutor(new AdminReportCommand(this));
-        getCommand("kick").setExecutor(new KickCommand(this));
-        getCommand("info").setExecutor(new InfoCommand(this));
-        getCommand("allowmsg").setExecutor(new AllowMsgCommand(this)); 
-        getCommand("warnmsg").setExecutor(new WarnMsgCommand(this)); 
-        getCommand("setban").setExecutor(new SetBanCommand(this));
+    getServer().getConsoleSender().sendMessage(prefix() + "§f原神§2正在加载");
+    getServer().getConsoleSender().sendMessage(prefix() + ModelManager.getInstance().getCurrentModelName() + "§6偷偷告诉你: §e" + hitokoto);
+    getServer().getConsoleSender().sendMessage(prefix() + "§f哇！传送锚点已解锁，当前Model: " + ModelManager.getInstance().getCurrentModelName());
 
-        getServer().getConsoleSender().sendMessage("§b  _                      ____              _      _     _   ");
-        getServer().getConsoleSender().sendMessage("§6 | |                    |  _ \\            | |    (_)   | |  ");
-        getServer().getConsoleSender().sendMessage("§b | |     ___ _ __   __ _| |_) | __ _ __ | |     _ ___| |_ ");
-        getServer().getConsoleSender().sendMessage("§f | |    / _ \\ '_ \\ / _` |  _ < / _` | '_ \\| |    | / __| __|");
-        getServer().getConsoleSender().sendMessage("§b | |___|  __/ | | | (_| | |_) | (_| | | | | |____| \\__ \\ |_ ");
-        getServer().getConsoleSender().sendMessage("§6 |______\\___|_| |_|\\__,_|___/ \\__,_|_| |_|______|_|___/\\__|");
-        getServer().getConsoleSender().sendMessage("§b                   __/ |                                    ");
-        getServer().getConsoleSender().sendMessage("§f                   |___/                                     ");
-        getServer().getConsoleSender().sendMessage("§6当前运行版本：v" + getPluginVersion());
-        getServer().getConsoleSender().sendMessage("§3当前运行在：" + Bukkit.getServer().getVersion());
+    // 注册事件监听器
+    getServer().getPluginManager().registerEvents(new PlayerJoinListener(Lengbanlist.this), Lengbanlist.this);
+    getServer().getPluginManager().registerEvents(new ChatListener(Lengbanlist.this), Lengbanlist.this); 
+    getServer().getPluginManager().registerEvents(new OpJoinListener(Lengbanlist.this), Lengbanlist.this);
+    getServer().getPluginManager().registerEvents(new ChestUIListener(Lengbanlist.this), Lengbanlist.this);
+    getServer().getPluginManager().registerEvents(new AnvilGUIListener(Lengbanlist.this), Lengbanlist.this);
+    modelChoiceListener = new ModelChoiceListener(Lengbanlist.this);
+    getServer().getPluginManager().registerEvents(modelChoiceListener, Lengbanlist.this);
 
-        new Metrics(this, 24495);
+    // 注册命令
+    getCommand("lban").setExecutor(new LengbanlistCommand("lban", Lengbanlist.this));
+    getCommand("ban").setExecutor(new BanCommand(Lengbanlist.this));
+    getCommand("ban-ip").setExecutor(new BanIpCommand(Lengbanlist.this));
+    getCommand("unban").setExecutor(new UnbanCommand(Lengbanlist.this));
+    getCommand("warn").setExecutor(new WarnCommand(Lengbanlist.this));
+    getCommand("unwarn").setExecutor(new UnwarnCommand(Lengbanlist.this));
+    getCommand("check").setExecutor(new CheckCommand(Lengbanlist.this));
+    getCommand("report").setExecutor(new ReportCommand(Lengbanlist.this)); 
+    getCommand("admin").setExecutor(new AdminReportCommand(Lengbanlist.this));
+    getCommand("kick").setExecutor(new KickCommand(Lengbanlist.this));
+    getCommand("info").setExecutor(new InfoCommand(Lengbanlist.this));
+    getCommand("allowmsg").setExecutor(new AllowMsgCommand(Lengbanlist.this)); 
+    getCommand("warnmsg").setExecutor(new WarnMsgCommand(Lengbanlist.this)); 
+
+    getServer().getConsoleSender().sendMessage("§b  _                      ____              _      _     _   ");
+    getServer().getConsoleSender().sendMessage("§6 | |                    |  _ \\            | |    (_)   | |  ");
+    getServer().getConsoleSender().sendMessage("§b | |     ___ _ __   __ _| |_) | __ _ __ | |     _ ___| |_ ");
+    getServer().getConsoleSender().sendMessage("§f | |    / _ \\ '_ \\ / _` |  _ < / _` | '_ \\| |    | / __| __|");
+    getServer().getConsoleSender().sendMessage("§b | |___|  __/ | | | (_| | |_) | (_| | | | | |____| \\__ \\ |_ ");
+    getServer().getConsoleSender().sendMessage("§6 |______\\___|_| |_|\\__,_|___/ \\__,_|_| |_|______|_|___/\\__|");
+    getServer().getConsoleSender().sendMessage("§b                   __/ |                                    ");
+    getServer().getConsoleSender().sendMessage("§f                   |___/                                     ");
+    getServer().getConsoleSender().sendMessage("§6当前运行版本：v" + getPluginVersion());
+    getServer().getConsoleSender().sendMessage("§3当前运行在：" + Bukkit.getServer().getVersion());
+
+    new Metrics(Lengbanlist.this, 24495);
+    
+    // 在异步中执行更新检查
     if (!getConfig().getBoolean("disable-update-check", false)) {
-        GitHubUpdateChecker.checkUpdate();
-    } else {
-        getLogger().info("更新检查已禁用");
+        runAsync(new Runnable() {
+            @Override
+            public void run() {
+                GitHubUpdateChecker.checkUpdate();
+            }
+        });
     }
 
-        if (isBroadcast) {
-            task = new BroadCastBanCountMessage().runTaskTimer(Lengbanlist.getInstance(), 0L, getConfig().getInt("sendtime") * 1200L);
-        }
+    if (isBroadcast) {
+        startBroadcastTask();
     }
+}
 
     @Override
     public void onDisable() {
@@ -174,18 +214,56 @@ public class Lengbanlist extends JavaPlugin {
             task.cancel();
         }
 
-        // 注销所有监听器
         org.bukkit.event.HandlerList.unregisterAll(this);
-
-        // 保存配置文件
-        saveBanConfig();
-        saveBanIpConfig();
-        saveMuteConfig();
-        saveBroadcastConfig();
-        saveWarnConfig();
-        reportManager.saveReports(); // 保存举报记录
+       unregisterCommands();
+        // 只有在 EULA 同意且配置已初始化时才保存
+        if (eulaAgreed) {
+            saveBanConfig();
+            saveBanIpConfig();
+            saveMuteConfig();
+            saveBroadcastConfig();
+            saveWarnConfig();
+            if (reportManager != null) {
+                reportManager.saveReports();
+            }
+        }
 
         getServer().getConsoleSender().sendMessage(prefix() + "§f期待我们的下一次相遇！");
+    }
+
+    private void startBroadcastTask() {
+        long interval = getConfig().getInt("sendtime") * 1200L;
+        long delay = 200L;
+        
+        if (isFolia) {
+            try {
+                Class<?> globalRegionSchedulerClass = Class.forName("io.papermc.paper.threadedregions.scheduler.GlobalRegionScheduler");
+                java.lang.reflect.Method getGlobalRegionSchedulerMethod = Bukkit.class.getMethod("getGlobalRegionScheduler");
+                Object globalScheduler = getGlobalRegionSchedulerMethod.invoke(null);
+                
+                java.lang.reflect.Method runAtFixedRateMethod = globalScheduler.getClass().getMethod("runAtFixedRate", 
+                    JavaPlugin.class, java.util.function.Consumer.class, long.class, long.class);
+                
+                Runnable broadcastTask = new Runnable() {
+                    @Override
+                    public void run() {
+                        if (Lengbanlist.this.isEnabled()) {
+                            new BroadCastBanCountMessage().run();
+                        }
+                    }
+                };
+                
+                java.util.function.Consumer<Object> taskConsumer = t -> broadcastTask.run();
+                runAtFixedRateMethod.invoke(globalScheduler, this, taskConsumer, delay, interval);
+                
+            } catch (Exception e) {
+                if (!isFolia) {
+                    task = new BroadCastBanCountMessage().runTaskTimer(this, delay, interval);
+                }
+            }
+        } else {
+            task = new BroadCastBanCountMessage().runTaskTimer(this, delay, interval);
+        }
     }
 
     public String prefix() {
@@ -215,13 +293,32 @@ public class Lengbanlist extends JavaPlugin {
     public void setBroadcastEnabled(boolean broadcastEnabled) {
         this.isBroadcast = broadcastEnabled;
         if (isBroadcast) {
-            task = new BroadCastBanCountMessage().runTaskTimer(Lengbanlist.getInstance(), 0L, getConfig().getInt("sendtime") * 1200L);
+            startBroadcastTask();
         } else {
             if (task != null) {
                 task.cancel();
             }
         }
     }
+
+private void unregisterCommands() {
+    try {
+        CommandMap commandMap = getCommandMap();
+        if (commandMap != null) {
+            String[] commands = {"lban", "ban", "ban-ip", "unban", "warn", "unwarn", "check", 
+                               "report", "admin", "kick", "info", "allowmsg", "warnmsg"};
+            
+            for (String commandName : commands) {
+                org.bukkit.command.Command command = commandMap.getCommand(commandName);
+                if (command != null) {
+                    command.unregister(commandMap);
+                }
+            }
+        }
+    } catch (Exception e) {
+        getLogger().warning("取消注册命令时出现错误: " + e.getMessage());
+    }
+}
 
     public String toggleBroadcast() {
         setBroadcastEnabled(!isBroadcastEnabled());
@@ -328,7 +425,6 @@ public class Lengbanlist extends JavaPlugin {
         return new ChestUIListener(this);
     }
 
-    // 获取一言的方法
     public String getHitokoto() {
         try {
             URL url = new URL("https://v1.hitokoto.cn/");
@@ -338,8 +434,7 @@ public class Lengbanlist extends JavaPlugin {
 
             int responseCode = connection.getResponseCode();
             if (responseCode != 200) {
-                getLogger().warning("一言 API 请求失败，状态码: " + responseCode);
-                return "§c无法获取一言";
+                return "我不说了，嘿嘿~";
             }
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
@@ -350,14 +445,12 @@ public class Lengbanlist extends JavaPlugin {
             }
             reader.close();
 
-            // 解析 JSON 响应
             String jsonResponse = response.toString();
             String hitokoto = jsonResponse.split("\"hitokoto\":\"")[1].split("\"")[0];
             String from = jsonResponse.split("\"from\":\"")[1].split("\"")[0];
             return hitokoto + " —— " + from;
         } catch (Exception e) {
-            getLogger().warning("获取一言时出错: " + e.getMessage());
-            return "§c无法获取一言";
+            return "我不说了，嘿嘿~";
         }
     }
 
@@ -365,8 +458,36 @@ public class Lengbanlist extends JavaPlugin {
         return chatConfig;
     }
 
-    // 检查更新插件
     public void checkUpdate() {
         new AutoUpdateManager(this).checkAndAutoUpdate();
     }
+    
+    public boolean isFolia() {
+        return isFolia;
+    }
+    
+public void runAsync(Runnable task) {
+    if (isFolia) {
+        try {
+            // Folia 的异步调度器
+            Class<?> asyncSchedulerClass = Class.forName("io.papermc.paper.threadedregions.scheduler.AsyncScheduler");
+            java.lang.reflect.Method getAsyncSchedulerMethod = Bukkit.class.getMethod("getAsyncScheduler");
+            Object asyncScheduler = getAsyncSchedulerMethod.invoke(null);
+            
+            java.lang.reflect.Method runNowMethod = asyncScheduler.getClass().getMethod("runNow", 
+                JavaPlugin.class, java.util.function.Consumer.class);
+            
+            java.util.function.Consumer<Object> taskConsumer = t -> task.run();
+            runNowMethod.invoke(asyncScheduler, this, taskConsumer);
+        } catch (Exception e) {
+            // 如果反射失败，回退到传统方法（但可能在 Folia 中不可用）
+            getLogger().warning("Folia async scheduler failed, falling back to traditional method");
+            // 在 Folia 中不要使用传统的异步调度器
+            task.run(); // 直接在当前线程运行
+        }
+    } else {
+        // 传统服务器的异步调度
+        Bukkit.getScheduler().runTaskAsynchronously(this, task);
+    }
+}
 }
