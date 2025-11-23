@@ -11,7 +11,7 @@ public class DatabaseManager {
 
     public void initDatabase() {
         String type = Lengbanlist.getInstance().getConfig().getString("database.type");
-        if ("sqlite".equalsIgnoreCase(type)) {
+        if ("yml".equalsIgnoreCase(type)) {
             String dbPath = Lengbanlist.getInstance().getDataFolder().getAbsolutePath() + "/lengbanlist.db";
             try {
                 connection = DriverManager.getConnection("jdbc:sqlite:" + dbPath);

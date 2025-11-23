@@ -178,6 +178,7 @@ public void onEnable() {
     getCommand("info").setExecutor(new InfoCommand(Lengbanlist.this));
     getCommand("allowmsg").setExecutor(new AllowMsgCommand(Lengbanlist.this)); 
     getCommand("warnmsg").setExecutor(new WarnMsgCommand(Lengbanlist.this)); 
+    getCommand("setban").setExecutor(new SetBanCommand(Lengbanlist.this));
 
     getServer().getConsoleSender().sendMessage("§b  _                      ____              _      _     _   ");
     getServer().getConsoleSender().sendMessage("§6 | |                    |  _ \\            | |    (_)   | |  ");
@@ -207,29 +208,52 @@ public void onEnable() {
     }
 }
 
-    @Override
-    public void onDisable() {
-        getServer().getConsoleSender().sendMessage(prefix() + "§k§4正在卸载");
-        if (task != null) {
+@Override
+public void onDisable() {
+    getServer().getConsoleSender().sendMessage(prefix() + "§k§4正在卸载");
+    
+    if (task != null) {
+        try {
             task.cancel();
+        } catch (Exception e) {
         }
-
-        org.bukkit.event.HandlerList.unregisterAll(this);
-       unregisterCommands();
-        // 只有在 EULA 同意且配置已初始化时才保存
-        if (eulaAgreed) {
-            saveBanConfig();
-            saveBanIpConfig();
-            saveMuteConfig();
-            saveBroadcastConfig();
-            saveWarnConfig();
-            if (reportManager != null) {
-                reportManager.saveReports();
-            }
-        }
-
-        getServer().getConsoleSender().sendMessage(prefix() + "§f期待我们的下一次相遇！");
+        task = null;
     }
+    
+    try {
+        org.bukkit.event.HandlerList.unregisterAll(this);
+        if (modelChoiceListener != null) {
+            org.bukkit.event.HandlerList.unregisterAll(modelChoiceListener);
+        }
+    } catch (Exception e) {
+    }
+    
+    try {
+        unregisterCommands();
+    } catch (Exception e) {
+    }
+    
+    if (isFolia) {
+        try {
+            Thread.sleep(50); 
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+    
+    if (eulaAgreed) {
+        saveBanConfig();
+        saveBanIpConfig();
+        saveMuteConfig();
+        saveBroadcastConfig();
+        saveWarnConfig();
+        if (reportManager != null) {
+            reportManager.saveReports();
+        }
+    }
+
+    getServer().getConsoleSender().sendMessage(prefix() + "§f期待我们的下一次相遇！");
+}
 
     private void startBroadcastTask() {
         long interval = getConfig().getInt("sendtime") * 1200L;
@@ -306,7 +330,7 @@ private void unregisterCommands() {
         CommandMap commandMap = getCommandMap();
         if (commandMap != null) {
             String[] commands = {"lban", "ban", "ban-ip", "unban", "warn", "unwarn", "check", 
-                               "report", "admin", "kick", "info", "allowmsg", "warnmsg"};
+                               "report", "admin", "kick", "info", "allowmsg", "warnmsg", "setban"};
             
             for (String commandName : commands) {
                 org.bukkit.command.Command command = commandMap.getCommand(commandName);

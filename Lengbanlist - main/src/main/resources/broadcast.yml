@@ -1,2 +1,5 @@
 default-message: "§f[§b§oServer §f§oNetwork§f] §6当前§c已封禁 §f%t §c人 §b(§f%s §c个ID §c已封禁 §f%i §c个IP §b)§4§n禁止私自盗取物品，破坏机器，损坏建筑！§f如遭遇此类事件，请进群处理：§bxxxxxxx"
-#可用变量：%s 封禁玩家（ID），%i 封禁IP %t 总共封禁
+#可用变量：
+# %s 封禁玩家（ID），
+# %i 封禁IP 
+# %t 总共封禁

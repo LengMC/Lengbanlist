@@ -1,6 +1,6 @@
 name: Lengbanlist
 main: org.leng.Lengbanlist
-version: 1.7.8
+version: 1.7.9
 api-version: 1.21
 folia-supported: true
 authors: 
@@ -67,7 +67,7 @@ commands:
     permission: lengbanlist.warnmsg
   setban:
     description: 设置玩家的封禁时间
-    usage: /<command> <玩家名> <时间/forever/auto> <理由>
+    usage: /<command> <玩家名/IP> <时间/forever/auto> <理由>
     permission: lengbanlist.setban
 permissions:
   lengbanlist.ban:
