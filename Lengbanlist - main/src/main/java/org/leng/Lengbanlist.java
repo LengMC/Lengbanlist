@@ -45,96 +45,112 @@ public class Lengbanlist extends JavaPlugin {
     private boolean isFolia = false;
     private boolean eulaAgreed = false;
 
-    @Override
-    public void onLoad() {
-        try {
-            Class.forName("io.papermc.paper.threadedregions.RegionizedServer");
-            isFolia = true;
-        } catch (ClassNotFoundException e) {
-            isFolia = false;
-        }
-        
-        saveDefaultConfig();
-        instance = this;
-        
-        File eulaFile = new File(getDataFolder(), "eula.yml");
-        if (!eulaFile.exists()) {
-            eulaFile.getParentFile().mkdirs();
-            saveResource("eula.yml", false);
-            eulaAgreed = false;
-            return;
-        }
-        
-        eulaFC = YamlConfiguration.loadConfiguration(eulaFile);
-        String agreement = eulaFC.getString("I have read and agree", "no");
-       eulaAgreed = "yes".equalsIgnoreCase(agreement != null ? agreement.trim() : "no");
-        
-        if (!eulaAgreed) {
-            return;
-        }
-        
-        // EULA 同意后才初始化
-        banManager = new BanManager();
-        muteManager = new MuteManager();
-        warnManager = new WarnManager();
-        reportManager = new ReportManager(this); 
-        isBroadcast = getConfig().getBoolean("opensendtime");
-        modelManager = ModelManager.getInstance();
-
-        File ipFile = new File(getDataFolder(), "ip.yml");
-        if (!ipFile.exists()) {
-            ipFile.getParentFile().mkdirs();
-            saveResource("ip.yml", false);
-        }
-        ipFC = YamlConfiguration.loadConfiguration(ipFile);
-
-        File banFile = new File(getDataFolder(), "ban-list.yml");
-        File banIpFile = new File(getDataFolder(), "banip-list.yml");
-        File muteFile = new File(getDataFolder(), "mute-list.yml");
-        File warnFile = new File(getDataFolder(), "warn-list.yml");
-        File reportFile = new File(getDataFolder(), "reports.yml"); 
-        if (!banFile.exists()) {
-            banFile.getParentFile().mkdirs();
-            saveResource("ban-list.yml", false);
-        }
-        if (!banIpFile.exists()) {
-            banIpFile.getParentFile().mkdirs();
-            saveResource("banip-list.yml", false);
-        }
-        if (!muteFile.exists()) {
-            muteFile.getParentFile().mkdirs();
-            saveResource("mute-list.yml", false);
-        }
-        if (!warnFile.exists()) {
-            warnFile.getParentFile().mkdirs();
-            saveResource("warn-list.yml", false);
-        }
-        if (!reportFile.exists()) { 
-            reportFile.getParentFile().mkdirs();
-            saveResource("reports.yml", false);
-        }
-        banFC = YamlConfiguration.loadConfiguration(banFile);
-        banIpFC = YamlConfiguration.loadConfiguration(banIpFile);
-        muteFC = YamlConfiguration.loadConfiguration(muteFile);
-        warnFC = YamlConfiguration.loadConfiguration(warnFile);
-        reportFC = YamlConfiguration.loadConfiguration(reportFile); 
-
-        File chatConfigFile = new File(getDataFolder(), "chatconfig.yml");
-        if (!chatConfigFile.exists()) {
-            chatConfigFile.getParentFile().mkdirs();
-            saveResource("chatconfig.yml", false);
-        }
-        chatConfig = YamlConfiguration.loadConfiguration(chatConfigFile);
-        
-        hitokoto = getHitokoto();
-
-        File broadcastFile = new File(getDataFolder(), "broadcast.yml");
-        if (!broadcastFile.exists()) {
-            broadcastFile.getParentFile().mkdirs();
-            saveResource("broadcast.yml", false);
-        }
-        broadcastFC = YamlConfiguration.loadConfiguration(broadcastFile);
+@Override
+public void onLoad() {
+    try {
+        Class.forName("io.papermc.paper.threadedregions.RegionizedServer");
+        isFolia = true;
+    } catch (ClassNotFoundException e) {
+        isFolia = false;
     }
+    
+    saveDefaultConfig();
+    instance = this;
+    
+    File eulaFile = new File(getDataFolder(), "eula.yml");
+    if (!eulaFile.exists()) {
+        eulaFile.getParentFile().mkdirs();
+        saveResource("eula.yml", false);
+        eulaAgreed = false;
+        return;
+    }
+    
+    eulaFC = YamlConfiguration.loadConfiguration(eulaFile);
+    String agreement = eulaFC.getString("I have read and agree", "no");
+    eulaAgreed = "yes".equalsIgnoreCase(agreement != null ? agreement.trim() : "no");  // 这里添加分号
+    
+    if (!eulaAgreed) {
+        return;
+    }
+    
+    // EULA 同意后才初始化
+    banManager = new BanManager();
+    muteManager = new MuteManager();
+    warnManager = new WarnManager();
+    reportManager = new ReportManager(this); 
+    isBroadcast = getConfig().getBoolean("opensendtime");
+    modelManager = ModelManager.getInstance();
+
+    File ipFile = new File(getDataFolder(), "ip.yml");
+    if (!ipFile.exists()) {
+        ipFile.getParentFile().mkdirs();
+        saveResource("ip.yml", false);
+    }
+    ipFC = YamlConfiguration.loadConfiguration(ipFile);
+
+    File banFile = new File(getDataFolder(), "ban-list.yml");
+    File banIpFile = new File(getDataFolder(), "banip-list.yml");
+    File muteFile = new File(getDataFolder(), "mute-list.yml");
+    File warnFile = new File(getDataFolder(), "warn-list.yml");
+    File reportFile = new File(getDataFolder(), "reports.yml"); 
+    if (!banFile.exists()) {
+        banFile.getParentFile().mkdirs();
+        saveResource("ban-list.yml", false);
+    }
+    if (!banIpFile.exists()) {
+        banIpFile.getParentFile().mkdirs();
+        saveResource("banip-list.yml", false);
+    }
+    if (!muteFile.exists()) {
+        muteFile.getParentFile().mkdirs();
+        saveResource("mute-list.yml", false);
+    }
+    if (!warnFile.exists()) {
+        warnFile.getParentFile().mkdirs();
+        saveResource("warn-list.yml", false);
+    }
+    if (!reportFile.exists()) { 
+        reportFile.getParentFile().mkdirs();
+        saveResource("reports.yml", false);
+    }
+    banFC = YamlConfiguration.loadConfiguration(banFile);
+    banIpFC = YamlConfiguration.loadConfiguration(banIpFile);
+    muteFC = YamlConfiguration.loadConfiguration(muteFile);
+    warnFC = YamlConfiguration.loadConfiguration(warnFile);
+    reportFC = YamlConfiguration.loadConfiguration(reportFile); 
+
+    File chatConfigFile = new File(getDataFolder(), "chatconfig.yml");
+    if (!chatConfigFile.exists()) {
+        chatConfigFile.getParentFile().mkdirs();
+        saveResource("chatconfig.yml", false);
+    }
+    chatConfig = YamlConfiguration.loadConfiguration(chatConfigFile);
+    
+    hitokoto = getHitokoto();
+
+    File broadcastFile = new File(getDataFolder(), "broadcast.yml"); 
+    if (!broadcastFile.exists()) {
+        broadcastFile.getParentFile().mkdirs();
+        try { 
+            broadcastFile.createNewFile(); 
+        } catch (IOException e) { 
+            e.printStackTrace(); 
+        }
+    }
+    broadcastFC = YamlConfiguration.loadConfiguration(broadcastFile);
+
+    if (!broadcastFC.contains("default-message")) {
+        broadcastFC.set("default-message", "§b当前封禁人数：%s 人，封禁IP数：%i 人，总计：%t 人");
+        File finalFile = broadcastFile;
+        runAsync(() -> {
+            try { 
+                broadcastFC.save(finalFile); 
+            } catch (IOException e) { 
+                e.printStackTrace(); 
+            }
+        });
+    }
+} 
 
 @Override
 public void onEnable() {
@@ -193,8 +209,28 @@ public void onEnable() {
 
     new Metrics(Lengbanlist.this, 24495);
     
-    // 在异步中执行更新检查
-    if (!getConfig().getBoolean("disable-update-check", false)) {
+    // 先检查是否需要更新
+    boolean updateCheckEnabled = getConfig().getBoolean("update-check", false);
+    boolean autoUpdateEnabled = getConfig().getBoolean("auto-update", false);
+    
+    // 如果启用了自动更新，优先执行自动更新
+    if (autoUpdateEnabled) {
+        getLogger().info("§a自动更新功能已启用，正在检查更新...");
+        // 延迟5秒执行自动更新，让服务器完全启动
+        runAsync(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(5000); // 等待5秒
+                    checkUpdate();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        });
+    } 
+    // 如果没有启用自动更新，但启用了更新检查
+    else if (updateCheckEnabled) { 
         runAsync(new Runnable() {
             @Override
             public void run() {
@@ -211,44 +247,18 @@ public void onEnable() {
 @Override
 public void onDisable() {
     getServer().getConsoleSender().sendMessage(prefix() + "§k§4正在卸载");
-    
-    if (task != null) {
-        try {
-            task.cancel();
-        } catch (Exception e) {
-        }
-        task = null;
-    }
-    
-    try {
-        org.bukkit.event.HandlerList.unregisterAll(this);
-        if (modelChoiceListener != null) {
-            org.bukkit.event.HandlerList.unregisterAll(modelChoiceListener);
-        }
-    } catch (Exception e) {
-    }
-    
-    try {
-        unregisterCommands();
-    } catch (Exception e) {
-    }
-    
-    if (isFolia) {
-        try {
-            Thread.sleep(50); 
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-    }
-    
+
+    if (task != null) task.cancel();
+
     if (eulaAgreed) {
-        saveBanConfig();
-        saveBanIpConfig();
-        saveMuteConfig();
-        saveBroadcastConfig();
-        saveWarnConfig();
-        if (reportManager != null) {
-            reportManager.saveReports();
+        try {
+            saveBanConfig();
+            saveBanIpConfig();
+            saveMuteConfig();
+            saveBroadcastConfig();
+            if (reportManager != null) reportManager.saveReports();
+        } catch (Exception e) {
+            getLogger().warning("保存配置文件时出错: " + e.getMessage());
         }
     }
 

@@ -1,13 +1,12 @@
 name: Lengbanlist
 main: org.leng.Lengbanlist
-version: 1.7.9
+version: 1.8.0
 api-version: 1.21
 folia-supported: true
 authors: 
   - LengMC
   - xiaoshaziYA
   - ShaoqingG
-  - OpenSource
 description: qwq
 commands:
   lban:

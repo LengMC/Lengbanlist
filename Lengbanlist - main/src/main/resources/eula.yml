@@ -1,32 +1,94 @@
-#————————————————————————
-#-->关于本插件【Lengbanlist】，您需要知悉的：
-#1.本插件在Github上开源：https://github.com/LengMC/Lengbanlist
-#2.本插件功能上绝对免费，此插件禁止倒卖，一经发现，严肃处理
-#3.本插件使用MPL - 2.0开源协议开源，请您注意，禁止违反开源协议，本插件追加插件开发的一切权限，包括但不限于解释权，禁用权等
-#4.使用或fork自本插件的项目应使用对应的许可证，同时你需要注意一些许可证禁止的行为
-#5.本插件为个人开发的免费同人作品。'魈'、'胡桃'及其相关形象版权均为米哈游所有。本插件与米哈游无任何官方关联，不用于任何商业用途
-#————————————————————————
-#About：
-#This plugin is designed to provide a portable integration of banning and querying for high - version Minecraft servers. It is fully based on the local system and offers customizable models for users to choose from. It features good performance and will be regularly updated.
-#————————————————————————
-#-->注意事项：
-#1.您可以在爱发电支持作者，其他平台让您赞助的都是冒牌，赞助前请注意辨别，赞助代表你是自愿的，创作者不会退回费用，未成年禁止赞助：https://afdian.com/a/lengbanlist
-#2.您可以在苦力怕论坛：https://klpbbs.com/thread-154852-1-1.html 找到此插件并给个好评，也可以在Github上：https://github.com/LengMC/Lengbanlist 上给个stars！！谢谢！！！
-#-->绝对知悉：
-#1.本插件支持热加载，如替换插件更新后无法正常使用，请重启服务器，确保插件正常运作
-#2.本插件没有后门且在github上开源，您可以自行编译
-#3.本插件保证不会随意收集您的任何信息，只作服务器统计服务
-#4.任何bug反馈前，请一定确保是本插件的bug，有的时候可能是别的插件造成的
-#5.态度谦和诚恳的反馈会获得优先处理
-#6.好的建议将被采纳
-#7.爱发电上赞助的可获得BETA权限，获得更多福利！
-#8.如果出现插件文件无法正常加载的情况，请删除plugins/Lengbanlist文件夹，重启服务端尝试
-#9.致歉：本插件的数据库管理尚未完全完成，由于更新缓慢，请耐心等待
+# ================================================
+# Lengbanlist 插件最终用户许可协议 (EULA)
+# End User License Agreement for Lengbanlist Plugin
+# ================================================
 
-#————————————————————————
-#作者：LengMC（插件作者：享有插件著作和解释说明权），Misaka Aurora(xiaoshaziYA)
-#编于：2025年11月23日
-#————————————————————————
+# 一、插件基本信息 / Basic Information
+# ------------------------------------------------
+# 1. 本插件为开源项目，源码发布于 GitHub：
+#    https://github.com/LengMC/Lengbanlist
+# 1. This plugin is open-source, available on GitHub:
+#    https://github.com/LengMC/Lengbanlist
 
-I have read and agree: "no"
-#改为yes以继续
+# 2. 本插件采用 MPL-2.0 开源协议授权。使用者须遵守该协议条款，禁止违反协议行为。
+#    插件开发者保留所有相关权利，包括但不限于解释权、禁用权等。
+# 2. This plugin is licensed under MPL-2.0. Users must comply with its terms.
+#    The developer reserves all related rights, including but not limited to interpretation and disabling.
+
+# 3. 基于本插件或其衍生作品须遵循对应开源协议，并注意协议中禁止的行为。
+# 3. Projects forked from or based on this plugin must comply with the corresponding open-source license and its prohibitions.
+
+# 4. 本插件为免费同人作品，与米哈游官方无关，不用于商业用途。
+#    “魈”“胡桃”等角色形象版权归米哈游所有。使用者须自行承担可能引发的版权或法律风险。
+# 4. This is a free fan-made plugin, not affiliated with miHoYo, and not for commercial use.
+#    Characters such as "Xiao" and "Hu Tao" are properties of miHoYo.
+#    Users are responsible for any potential copyright or legal issues arising from usage.
+
+# ================================================
+# 二、插件简介 / Plugin Description
+# ------------------------------------------------
+# 本插件为高版本 Minecraft 服务器提供轻量化的封禁与查询功能。
+# 完全基于本地系统，支持自定义模型，性能良好，并会持续更新。
+# This plugin provides a lightweight ban and query system for high-version Minecraft servers.
+# It runs entirely locally, supports customizable models, offers good performance, and will be regularly updated.
+
+# ================================================
+# 三、注意事项 / Important Notes
+# ------------------------------------------------
+# 1. 支持开发者：您可通过爱发电赞助作者（仅此官方渠道）：
+#    https://afdian.com/a/lengbanlist
+#    其他平台均为假冒，请注意识别。赞助视为自愿行为，费用不予退还，未成年人请勿赞助。
+# 1. Support the developer: You may sponsor the author via Afdian (sole official channel):
+#    https://afdian.com/a/lengbanlist
+#    Other platforms are impersonations. Sponsorship is voluntary, non-refundable, and not for minors.
+
+# 2. 欢迎在以下平台给予好评或 Star：
+#    苦力怕论坛：https://klpbbs.com/thread-154852-1-1.html
+#    GitHub：https://github.com/LengMC/Lengbanlist
+# 2. Your positive feedback is welcome on:
+#    KLPCBBS: https://klpbbs.com/thread-154852-1-1.html
+#    GitHub: https://github.com/LengMC/Lengbanlist
+
+# ================================================
+# 四、使用须知 / Usage Guidelines
+# ------------------------------------------------
+# 1. 本插件支持热加载。若更新后无法正常使用，请重启服务器。
+# 1. Hot-reload is supported. If the plugin malfunctions after update, restart the server.
+
+# 2. 本插件开源无后门，您可自行编译验证。
+# 2. This plugin is open-source and backdoor-free. You may compile it yourself.
+
+# 3. 本插件不会收集您的隐私信息，仅用于必要的服务器统计。
+# 3. No personal data is collected. Only necessary server statistics are gathered.
+
+# 4. 反馈问题前，请确认问题源自本插件，而非其他插件或系统。
+# 4. Before reporting issues, ensure they are caused by this plugin, not others.
+
+# 5. 礼貌、清晰的反馈将获得优先处理，优质建议将被采纳。
+# 5. Polite and clear feedback will be prioritized. Constructive suggestions are welcome.
+
+# 6. 爱发电赞助用户可获得 BETA 测试权限及更多福利。
+# 6. Afdian sponsors gain access to BETA features and additional benefits.
+
+# 7. 若插件无法加载，请删除 plugins/Lengbanlist 文件夹后重启服务器。
+# 7. If the plugin fails to load, delete the plugins/Lengbanlist folder and restart the server.
+
+# 8. 数据库管理功能仍在开发中，更新可能较慢，敬请耐心等待。
+# 8. Database management features are under development. Updates may be slow; thank you for your patience.
+
+# ================================================
+# 五、开发者信息 / Developer Information
+# ------------------------------------------------
+# 作者：LengMC（主开发者，享有著作权与解释权），Misaka Aurora (xiaoshaziYA)
+# Authors: LengMC (main developer, retains copyright and interpretation rights), Misaka Aurora (xiaoshaziYA)
+
+# 最后更新：2025年12月28日
+# Last Updated: December 28, 2025
+
+
+# ================================================
+# 六、用户同意 / User Agreement
+# ------------------------------------------------
+
+I have read and agree to the above terms: no
+# 请将 "no" 改为 "yes" 以表示同意 / Change "no" to "yes" to agree.

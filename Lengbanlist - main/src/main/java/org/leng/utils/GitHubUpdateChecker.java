@@ -100,23 +100,26 @@ public class GitHubUpdateChecker {
      * @param version2 版本号2
      * @return 如果 version1 小于 version2，返回 -1；如果 version1 等于 version2，返回 0；如果 version1 大于 version2，返回 1
      */
-    public static int compareVersions(String version1, String version2) {
-        String[] parts1 = version1.split("\\.");
-        String[] parts2 = version2.split("\\.");
-
-        int maxLength = Math.max(parts1.length, parts2.length);
-        for (int i = 0; i < maxLength; i++) {
-            int v1 = i < parts1.length ? Integer.parseInt(parts1[i]) : 0;
-            int v2 = i < parts2.length ? Integer.parseInt(parts2[i]) : 0;
-
-            if (v1 < v2) {
-                return -1;
-            } else if (v1 > v2) {
-                return 1;
-            }
-        }
-        return 0;
+public static int compareVersions(String v1, String v2) {
+    int[] a = parseVersion(v1);
+    int[] b = parseVersion(v2);
+    int len = Math.max(a.length, b.length);
+    for (int i = 0; i < len; i++) {
+        int x = i < a.length ? a[i] : 0;
+        int y = i < b.length ? b[i] : 0;
+        if (x != y) return Integer.compare(x, y);
     }
+    return 0;
+}
+
+private static int[] parseVersion(String ver) {
+    String[] s = ver.replaceAll("^v", "").split("\\.");
+    int[] arr = new int[s.length];
+    for (int i = 0; i < s.length; i++) {
+        arr[i] = Integer.parseInt(s[i].replaceAll("\\D+", "")); 
+    }
+    return arr;
+}
 
     /**
      * 检查是否有更新
@@ -173,4 +176,45 @@ public class GitHubUpdateChecker {
             e.printStackTrace(); // 打印完整的异常堆栈
         }
     }
+    
+/**
+ * 获取下载文件的URL
+ * @param version 版本号
+ * @return 下载URL
+ */
+public static String getDownloadUrl(String version) {
+    return "https://github.com/LengMC/Lengbanlist/releases/download/" + 
+           version + "/Lengbanlist-" + version + ".jar";  // GitHub release使用的是连字符格式
+}
+
+/**
+ * 获取GitHub Release上的文件名（不含路径）
+ * @param version 版本号
+ * @return 文件名
+ */
+public static String getGitHubFileName(String version) {
+    return "Lengbanlist-" + version + ".jar";  // GitHub使用的是连字符，没有空格
+}
+
+/**
+ * 获取本地应该使用的文件名格式（带空格）
+ * @param version 版本号
+ * @return 文件名
+ */
+public static String getLocalFileName(String version) {
+    return "Lengbanlist - " + version + ".jar";  // 本地使用带空格的格式
+}
+
+/**
+ * 根据当前文件名格式生成新版本的文件名
+ */
+public static String generateNewFileName(String currentFileName, String newVersion) {
+    // 如果当前文件名包含 " - " 格式，保持相同格式
+    if (currentFileName.contains(" - ") && currentFileName.endsWith(".jar")) {
+        String baseName = currentFileName.substring(0, currentFileName.lastIndexOf(" - "));
+        return baseName + " - " + newVersion + ".jar";
+    }
+    // 否则使用默认带空格的格式
+    return "Lengbanlist - " + newVersion + ".jar";
+}
 }

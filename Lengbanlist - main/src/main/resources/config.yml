@@ -1,10 +1,14 @@
-prefix: "§f§l[§bLengbanlist§f§l]"
-sendtime: 5 #已分钟为单位
+prefix: "§f§l[§bLengbanlist§f§l]" #插件前缀
+sendtime: 5 #以分钟为单位
 opensendtime: true #开启循环播报封禁人数
-Model: "Default"
-valid-models: "Default English HuTao Furina Zhongli Keqing Xiao Ayaka Zero Herta"
-disable-update-check: false # 是否禁用更新检查（默认：false）
-database:  # 尚未实现
+Model: "Default" #当前模型
+valid-models: "Default English HuTao Furina Zhongli Keqing Xiao Ayaka Zero Herta" #可用模型
+#以下建议只选一个开启
+update-check: false # 是否启用更新检查（默认：false）
+auto-update: false # 是否启用自动更新（默认：false）
+
+#数据库  （尚未实现）
+database: 
   type: "yml"  # 或 "mysql"
   mysql:
     host: "localhost"
